@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Building2, Landmark, Flag } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -7,12 +7,12 @@ import { getDbData } from "@/lib/db";
 import directorImg from "@/assets/director.jpg";
 
 export function About() {
-  const { data: dbData } = useQuery({
+  const { data: dbData } = useSuspenseQuery({
     queryKey: ["dbData"],
     queryFn: () => getDbData(),
   });
 
-  const about = dbData?.about || {
+  const about = dbData.about || {
     name: "Prof. Dr. R. Rajendran",
     designation: "Director, SUN Academic Research & Training, Chennai",
     bio: "A distinguished academician whose career took shape at Annamalai University, rising to Professor & Head of the Centre for Educational Management and Applied Science. Over three and a half decades, he has shaped generations of teachers, scholars and civil service aspirants across South India.",

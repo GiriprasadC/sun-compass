@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { getDbData } from "@/lib/db";
@@ -7,12 +7,12 @@ import { AnimatedCounter } from "./AnimatedCounter";
 import * as Icons from "lucide-react";
 
 export function WhyChooseUs() {
-  const { data: dbData } = useQuery({
+  const { data: dbData } = useSuspenseQuery({
     queryKey: ["dbData"],
     queryFn: () => getDbData(),
   });
 
-  const stats = dbData?.stats || [];
+  const stats = dbData.stats || [];
 
   return (
     <section className="bg-primary-tint/40 py-20 md:py-28">

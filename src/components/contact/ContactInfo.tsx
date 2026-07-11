@@ -1,14 +1,14 @@
 import { User, MapPin, Phone, Mail, Clock } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { getDbData } from "@/lib/db";
 
 export function ContactInfo() {
-  const { data: dbData } = useQuery({
+  const { data: dbData } = useSuspenseQuery({
     queryKey: ["dbData"],
     queryFn: () => getDbData(),
   });
 
-  const contact = dbData?.contactInfo || {
+  const contact = dbData.contactInfo || {
     directorName: "Prof. Dr. R. Rajendran",
     directorSub: "Director, SUN Academic Research & Training",
     address: "No.104/1, A.K. Swamy Nagar, 7th Street, Kilpauk, Chennai – 600010",

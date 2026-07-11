@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Hero } from "@/components/home/Hero";
 import { About } from "@/components/home/About";
 import { WhyChooseUs } from "@/components/home/WhyChooseUs";
@@ -19,12 +19,12 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const { data: dbData } = useQuery({
+  const { data: dbData } = useSuspenseQuery({
     queryKey: ["dbData"],
     queryFn: () => getDbData(),
   });
 
-  const services = dbData?.services || [];
+  const services = dbData.services || [];
   const [activeService, setActiveService] = useState<Service | null>(null);
 
   return (

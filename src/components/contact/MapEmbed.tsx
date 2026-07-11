@@ -1,13 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { getDbData } from "@/lib/db";
 
 export function MapEmbed() {
-  const { data: dbData } = useQuery({
+  const { data: dbData } = useSuspenseQuery({
     queryKey: ["dbData"],
     queryFn: () => getDbData(),
   });
 
-  const contactInfo = dbData?.contactInfo;
+  const contactInfo = dbData.contactInfo;
   const address = contactInfo?.address || "A.K. Swamy Nagar, Kilpauk, Chennai 600010";
   const mapSrc = contactInfo?.mapEmbedUrl || `https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`;
 

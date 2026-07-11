@@ -1,18 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { getDbData } from "@/lib/db";
 import heroImg from "@/assets/hero.jpg";
 
 export function Hero() {
-  const { data: dbData } = useQuery({
+  const { data: dbData } = useSuspenseQuery({
     queryKey: ["dbData"],
     queryFn: () => getDbData(),
   });
 
-  const hero = dbData?.hero || {
+  const hero = dbData.hero || {
     badge: "Chennai · Since 1989",
     title: "Empowering Research, Education & Professional Development",
     subtitle: "SUN Academic Research & Training partners with educators, scholars and institutions to deliver rigorous doctoral guidance, teacher capacity building, psychological assessments and civil services coaching.",

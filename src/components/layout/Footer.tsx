@@ -1,17 +1,17 @@
 import { Link } from "@tanstack/react-router";
 import { Facebook, Linkedin, Instagram, Youtube, GraduationCap, MapPin, Phone, Mail } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Container } from "@/components/ui/Container";
 import { navLinks } from "@/data/navLinks";
 import { getDbData } from "@/lib/db";
 
 export function Footer() {
-  const { data: dbData } = useQuery({
+  const { data: dbData } = useSuspenseQuery({
     queryKey: ["dbData"],
     queryFn: () => getDbData(),
   });
 
-  const contact = dbData?.contactInfo || {
+  const contact = dbData.contactInfo || {
     directorName: "Prof. Dr. R. Rajendran",
     directorSub: "Director, SUN Academic Research & Training",
     address: "No.104/1, A.K. Swamy Nagar, 7th Street, Kilpauk, Chennai – 600010",
@@ -20,7 +20,7 @@ export function Footer() {
     officeHours: "9:00 AM – 8:00 PM (All Days)"
   };
 
-  const social = dbData?.socialLinks || {
+  const social = dbData.socialLinks || {
     facebook: "",
     linkedin: "",
     instagram: "",

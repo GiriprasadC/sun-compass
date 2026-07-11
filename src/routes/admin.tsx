@@ -31,6 +31,52 @@ import {
   Upload
 } from "lucide-react";
 
+function resizeImage(file: File, maxWidth: number, maxHeight: number): Promise<{ base64Data: string; mimeType: string }> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Could not get 2d context"));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const mimeType = "image/jpeg";
+        const dataUrl = canvas.toDataURL(mimeType, 0.85);
+        const base64Data = dataUrl.split(",")[1];
+        resolve({ base64Data, mimeType });
+      };
+      img.onerror = () => reject(new Error("Failed to load image"));
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.readAsDataURL(file);
+  });
+}
+
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
@@ -1134,30 +1180,32 @@ function AdminPage() {
                                 if (!file) return;
                                 setIsHeroUploading(true);
 
-                                const reader = new FileReader();
-                                reader.onload = async (event) => {
-                                  const base64Data = (event.target?.result as string).split(",")[1];
-                                  try {
-                                    const res = await uploadImage({
-                                      data: {
-                                        filename: file.name,
-                                        mimeType: file.type,
-                                        base64Data,
+                                resizeImage(file, 1200, 1200)
+                                  .then(async ({ base64Data, mimeType }) => {
+                                    try {
+                                      const res = await uploadImage({
+                                        data: {
+                                          filename: file.name,
+                                          mimeType,
+                                          base64Data,
+                                        }
+                                      });
+                                      if (res.success && res.url) {
+                                        setHeroImageUrl(res.url);
+                                        toast.success("Hero image uploaded successfully");
+                                      } else {
+                                        toast.error(res.error || "Failed to upload image");
                                       }
-                                    });
-                                    if (res.success && res.url) {
-                                      setHeroImageUrl(res.url);
-                                      toast.success("Hero image uploaded successfully");
-                                    } else {
-                                      toast.error(res.error || "Failed to upload image");
+                                    } catch (err) {
+                                      toast.error("Error uploading image");
+                                    } finally {
+                                      setIsHeroUploading(false);
                                     }
-                                  } catch (err) {
-                                    toast.error("Error uploading image");
-                                  } finally {
+                                  })
+                                  .catch((err) => {
+                                    toast.error("Failed to process image: " + err.message);
                                     setIsHeroUploading(false);
-                                  }
-                                };
-                                reader.readAsDataURL(file);
+                                  });
                               }}
                             />
                           </label>
@@ -1300,30 +1348,32 @@ function AdminPage() {
                                 if (!file) return;
                                 setIsAboutUploading(true);
 
-                                const reader = new FileReader();
-                                reader.onload = async (event) => {
-                                  const base64Data = (event.target?.result as string).split(",")[1];
-                                  try {
-                                    const res = await uploadImage({
-                                      data: {
-                                        filename: file.name,
-                                        mimeType: file.type,
-                                        base64Data,
+                                resizeImage(file, 1200, 1200)
+                                  .then(async ({ base64Data, mimeType }) => {
+                                    try {
+                                      const res = await uploadImage({
+                                        data: {
+                                          filename: file.name,
+                                          mimeType,
+                                          base64Data,
+                                        }
+                                      });
+                                      if (res.success && res.url) {
+                                        setAboutImageUrl(res.url);
+                                        toast.success("Biography image uploaded successfully");
+                                      } else {
+                                        toast.error(res.error || "Failed to upload image");
                                       }
-                                    });
-                                    if (res.success && res.url) {
-                                      setAboutImageUrl(res.url);
-                                      toast.success("Biography image uploaded successfully");
-                                    } else {
-                                      toast.error(res.error || "Failed to upload image");
+                                    } catch (err) {
+                                      toast.error("Error uploading image");
+                                    } finally {
+                                      setIsAboutUploading(false);
                                     }
-                                  } catch (err) {
-                                    toast.error("Error uploading image");
-                                  } finally {
+                                  })
+                                  .catch((err) => {
+                                    toast.error("Failed to process image: " + err.message);
                                     setIsAboutUploading(false);
-                                  }
-                                };
-                                reader.readAsDataURL(file);
+                                  });
                               }}
                             />
                           </label>
