@@ -1,12 +1,13 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { CheckCircle2, Clock, MapPin, Sun } from "lucide-react";
-import type { Service } from "@/data/services";
+import * as Icons from "lucide-react";
+import type { Service } from "./ServiceCard";
 
 type Props = { service: Service | null; open: boolean; onOpenChange: (o: boolean) => void };
 
 export function ServiceModal({ service, open, onOpenChange }: Props) {
   if (!service) return null;
-  const Icon = service.icon;
+  const Icon = (Icons as any)[service.icon] || Icons.HelpCircle;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

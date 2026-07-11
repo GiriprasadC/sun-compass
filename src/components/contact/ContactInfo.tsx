@@ -1,23 +1,53 @@
 import { User, MapPin, Phone, Mail, Clock } from "lucide-react";
-
-const rows = [
-  {
-    Icon: User,
-    label: "Director",
-    value: "Prof. Dr. R. Rajendran",
-    sub: "Director, SUN Academic Research & Training",
-  },
-  {
-    Icon: MapPin,
-    label: "Address",
-    value: "No.104/1, A.K. Swamy Nagar, 7th Street, Kilpauk, Chennai – 600010",
-  },
-  { Icon: Phone, label: "Phone", value: "98403 41412", href: "tel:+919840341412" },
-  { Icon: Mail, label: "Email", value: "rajendra1234@gmail.com", href: "mailto:rajendra1234@gmail.com" },
-  { Icon: Clock, label: "Office Hours", value: "9:00 AM – 8:00 PM (All Days)" },
-];
+import { useQuery } from "@tanstack/react-query";
+import { getDbData } from "@/lib/db";
 
 export function ContactInfo() {
+  const { data: dbData } = useQuery({
+    queryKey: ["dbData"],
+    queryFn: () => getDbData(),
+  });
+
+  const contact = dbData?.contactInfo || {
+    directorName: "Prof. Dr. R. Rajendran",
+    directorSub: "Director, SUN Academic Research & Training",
+    address: "No.104/1, A.K. Swamy Nagar, 7th Street, Kilpauk, Chennai – 600010",
+    phone: "98403 41412",
+    email: "rajendra1234@gmail.com",
+    officeHours: "9:00 AM – 8:00 PM (All Days)"
+  };
+
+  const rows = [
+    {
+      Icon: User,
+      label: "Director",
+      value: contact.directorName,
+      sub: contact.directorSub,
+    },
+    {
+      Icon: MapPin,
+      label: "Address",
+      value: contact.address,
+    },
+    {
+      Icon: Phone,
+      label: "Phone",
+      value: contact.phone,
+      href: `tel:+91${contact.phone.replace(/\s+/g, "")}`,
+    },
+    {
+      Icon: Mail,
+      label: "Email",
+      value: contact.email,
+      href: `mailto:${contact.email}`,
+    },
+    {
+      Icon: Clock,
+      label: "Office Hours",
+      value: contact.officeHours,
+    },
+  ];
+
   return (
     <div className="rounded-3xl border border-border bg-white p-7 shadow-soft">
       <h3 className="font-display text-xl font-bold text-foreground">Get in touch</h3>

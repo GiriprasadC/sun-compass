@@ -1,11 +1,23 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import type { Service } from "@/data/services";
+import * as Icons from "lucide-react";
+
+export type Service = {
+  id: string;
+  icon: string;
+  title: string;
+  summary: string;
+  items: string[];
+  methodology?: string[];
+  duration?: string;
+  venue?: string;
+  timing?: string;
+};
 
 type Props = { service: Service; onOpen: () => void };
 
 export function ServiceCard({ service, onOpen }: Props) {
-  const Icon = service.icon;
+  const Icon = (Icons as any)[service.icon] || Icons.HelpCircle;
   return (
     <motion.div
       variants={{

@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { ServiceCard } from "@/components/services/ServiceCard";
+import { ServiceCard, type Service } from "@/components/services/ServiceCard";
 import { ServiceModal } from "@/components/services/ServiceModal";
-import { services, type Service } from "@/data/services";
+import { getDbData } from "@/lib/db";
 
 export const Route = createFileRoute("/services")({
   head: () => ({
@@ -28,6 +29,12 @@ export const Route = createFileRoute("/services")({
 });
 
 function ServicesPage() {
+  const { data: dbData } = useQuery({
+    queryKey: ["dbData"],
+    queryFn: () => getDbData(),
+  });
+
+  const services = dbData?.services || [];
   const [active, setActive] = useState<Service | null>(null);
 
   return (

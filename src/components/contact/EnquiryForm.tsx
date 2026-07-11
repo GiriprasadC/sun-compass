@@ -4,7 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
 import { CheckCircle2, Loader2, Send } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { submitEnquiry } from "@/lib/db";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Please enter your name").max(80),
@@ -19,16 +21,24 @@ type FormValues = z.infer<typeof schema>;
 
 export function EnquiryForm() {
   const [sent, setSent] = useState(false);
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (values: FormValues) => submitEnquiry({ data: values }),
+    onSuccess: () => {
+      setSent(true);
+      queryClient.invalidateQueries({ queryKey: ["dbData"] });
+    },
+  });
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: zodResolver(schema), mode: "onBlur" });
 
-  const onSubmit = async (_values: FormValues) => {
-    // TODO: wire up actual delivery (EmailJS / Formspree / Resend / Cloud table)
-    await new Promise((r) => setTimeout(r, 900));
-    setSent(true);
+  const onSubmit = async (values: FormValues) => {
+    await mutation.mutateAsync(values);
   };
 
   if (sent) {

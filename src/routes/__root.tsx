@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { getDbData } from "@/lib/db";
 
 function NotFoundComponent() {
   return (
@@ -75,6 +76,12 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData({
+      queryKey: ["dbData"],
+      queryFn: () => getDbData(),
+    });
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
