@@ -1,10 +1,43 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Container } from "@/components/ui/Container";
+import { getDbData } from "@/lib/db";
 import heroImg from "@/assets/hero.jpg";
 
 export function Hero() {
+  const { data: dbData } = useQuery({
+    queryKey: ["dbData"],
+    queryFn: () => getDbData(),
+  });
+
+  const hero = dbData?.hero || {
+    badge: "Chennai · Since 1989",
+    title: "Empowering Research, Education & Professional Development",
+    subtitle: "SUN Academic Research & Training partners with educators, scholars and institutions to deliver rigorous doctoral guidance, teacher capacity building, psychological assessments and civil services coaching.",
+    experienceText: "35+ years",
+    experienceSub: "of academic excellence",
+    imageUrl: ""
+  };
+
+  const displayImage = hero.imageUrl || heroImg;
+
+  const renderTitle = () => {
+    const highlightText = "Professional Development";
+    if (hero.title.includes(highlightText)) {
+      const parts = hero.title.split(highlightText);
+      return (
+        <>
+          {parts[0]}
+          <span className="text-primary">{highlightText}</span>
+          {parts[1]}
+        </>
+      );
+    }
+    return hero.title;
+  };
+
   return (
     <section className="relative overflow-hidden pt-28 md:pt-36">
       {/* Green blob */}
@@ -25,18 +58,15 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary-tint px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-            <Sparkles className="h-3.5 w-3.5" />
-            Chennai · Since 1989
+          <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary-tint bg-opacity-70 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+            <Sparkles className="h-3.5 w-3.5 animate-pulse" />
+            {hero.badge}
           </span>
           <h1 className="mt-6 font-display text-4xl font-bold leading-[1.05] text-foreground md:text-6xl lg:text-[4rem]">
-            Empowering Research, Education &amp;{" "}
-            <span className="text-primary">Professional Development</span>
+            {renderTitle()}
           </h1>
           <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
-            SUN Academic Research &amp; Training partners with educators, scholars and institutions to
-            deliver rigorous doctoral guidance, teacher capacity building, psychological assessments
-            and civil services coaching.
+            {hero.subtitle}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
@@ -67,17 +97,17 @@ export function Hero() {
             className="relative overflow-hidden rounded-3xl border border-border shadow-elevated"
           >
             <img
-              src={heroImg}
+              src={displayImage}
               alt="Academic research and training environment"
               width={1024}
               height={1024}
-              className="h-auto w-full object-cover"
+              className="h-[360px] md:h-[480px] w-full object-cover"
             />
           </motion.div>
           {/* Floating stat card */}
           <div className="absolute -bottom-6 -left-6 hidden rounded-2xl border border-border bg-white p-4 shadow-elevated sm:block">
-            <div className="text-2xl font-bold text-primary">35+ years</div>
-            <div className="text-xs uppercase tracking-wider text-muted-foreground">of academic excellence</div>
+            <div className="text-2xl font-bold text-primary">{hero.experienceText}</div>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">{hero.experienceSub}</div>
           </div>
         </motion.div>
       </Container>

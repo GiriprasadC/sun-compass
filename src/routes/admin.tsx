@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getDbData, updateStats, updateServices, updateContactInfo, updateSocialLinks, deleteEnquiry, type DbData } from "@/lib/db";
+import { getDbData, updateStats, updateServices, updateContactInfo, updateSocialLinks, deleteEnquiry, updateHero, updateAbout, type DbData } from "@/lib/db";
 import { Container } from "@/components/ui/Container";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -26,7 +26,8 @@ import {
   Clock,
   ExternalLink,
   ChevronRight,
-  X
+  X,
+  Info
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -47,7 +48,7 @@ function AdminPage() {
   const queryClient = useQueryClient();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passcode, setPasscode] = useState("");
-  const [activeTab, setActiveTab] = useState<"dashboard" | "enquiries" | "services" | "stats" | "contact">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "enquiries" | "services" | "stats" | "contact" | "heroAbout">("dashboard");
 
   // Fetch db data
   const { data: dbData, isLoading } = useQuery({
@@ -126,15 +127,43 @@ function AdminPage() {
     onError: () => toast.error("Failed to delete enquiry"),
   });
 
+  const heroMutation = useMutation({
+    mutationFn: (hero: DbData["hero"]) => updateHero({ data: hero }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["dbData"] });
+      toast.success("Hero section updated successfully");
+    },
+    onError: () => toast.error("Failed to update Hero section"),
+  });
+
+  const aboutMutation = useMutation({
+    mutationFn: (about: DbData["about"]) => updateAbout({ data: about }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["dbData"] });
+      toast.success("About section updated successfully");
+    },
+    onError: () => toast.error("Failed to update About section"),
+  });
+
   // Services State management (local edit states)
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
   const [localServices, setLocalServices] = useState<any[]>([]);
   const [selectedService, setSelectedService] = useState<any | null>(null);
 
+  // Hero & About State management (local edit arrays)
+  const [aboutCredentials, setAboutCredentials] = useState<string[]>([]);
+  const [aboutAffiliations, setAboutAffiliations] = useState<string[]>([]);
+  const [aboutBulletPoints, setAboutBulletPoints] = useState<string[]>([]);
+
   // Sync server data to local edit forms
   useEffect(() => {
     if (dbData?.services) {
       setLocalServices(dbData.services);
+    }
+    if (dbData?.about) {
+      setAboutCredentials(dbData.about.credentials || []);
+      setAboutAffiliations(dbData.about.affiliations || []);
+      setAboutBulletPoints(dbData.about.bulletPoints || []);
     }
   }, [dbData]);
 
@@ -186,9 +215,6 @@ function AdminPage() {
               <ChevronRight className="ml-1 h-4 w-4" />
             </button>
           </form>
-          <div className="mt-6 rounded-xl bg-slate-50 p-3.5 text-center text-xs text-muted-foreground">
-            <span className="font-semibold text-foreground">Demo Tip:</span> Use <code className="bg-slate-100 px-1 py-0.5 rounded text-primary">admin123</code> to log in.
-          </div>
         </motion.div>
       </div>
     );
@@ -226,6 +252,7 @@ function AdminPage() {
             { id: "services", label: "Manage Services", Icon: GraduationCap },
             { id: "stats", label: "Stats (Why Choose Us)", Icon: Award },
             { id: "contact", label: "Contact & Socials", Icon: Share2 },
+            { id: "heroAbout", label: "Hero & About", Icon: Info },
           ].map(({ id, label, Icon }) => (
             <button
               key={id}
@@ -839,6 +866,7 @@ function AdminPage() {
                           phone: formData.get("phone") as string,
                           email: formData.get("email") as string,
                           officeHours: formData.get("officeHours") as string,
+                          mapEmbedUrl: formData.get("mapEmbedUrl") as string || "",
                         };
                         contactMutation.mutate(data);
                       }}
@@ -909,6 +937,18 @@ function AdminPage() {
                           type="text"
                           name="officeHours"
                           defaultValue={contactInfo.officeHours}
+                          className="mt-1.5 w-full rounded-xl border border-border px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          Custom Google Maps Embed URL (Optional)
+                        </label>
+                        <input
+                          type="url"
+                          placeholder="https://www.google.com/maps/embed?..."
+                          name="mapEmbedUrl"
+                          defaultValue={contactInfo.mapEmbedUrl}
                           className="mt-1.5 w-full rounded-xl border border-border px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
                         />
                       </div>
@@ -1011,6 +1051,188 @@ function AdminPage() {
                         Save Social Links
                       </button>
                     </form>
+                  </div>
+                </div>
+              )}
+
+              {/* HERO & ABOUT TAB */}
+              {activeTab === "heroAbout" && (
+                <div className="grid gap-6 md:grid-cols-2">
+                  {/* Hero Settings */}
+                  <div className="rounded-3xl border border-border bg-white p-6 shadow-soft">
+                    <h3 className="font-display text-lg font-bold text-foreground">Hero Section</h3>
+                    <p className="text-xs text-muted-foreground">Customize titles, badge texts, and experience metrics in the Hero section.</p>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.currentTarget);
+                        const data = {
+                          badge: formData.get("badge") as string,
+                          title: formData.get("title") as string,
+                          subtitle: formData.get("subtitle") as string,
+                          experienceText: formData.get("experienceText") as string,
+                          experienceSub: formData.get("experienceSub") as string,
+                          imageUrl: formData.get("imageUrl") as string || "",
+                        };
+                        heroMutation.mutate(data);
+                      }}
+                      className="mt-6 space-y-4"
+                    >
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Badge Text</label>
+                        <input type="text" name="badge" defaultValue={dbData?.hero?.badge} className="mt-1.5 w-full rounded-xl border border-border px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Headline Title</label>
+                        <input type="text" name="title" defaultValue={dbData?.hero?.title} className="mt-1.5 w-full rounded-xl border border-border px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Description Subtitle</label>
+                        <textarea rows={4} name="subtitle" defaultValue={dbData?.hero?.subtitle} className="mt-1.5 w-full rounded-xl border border-border px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary resize-y" />
+                      </div>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stats Card Value</label>
+                          <input type="text" name="experienceText" defaultValue={dbData?.hero?.experienceText} className="mt-1.5 w-full rounded-xl border border-border px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stats Card Description</label>
+                          <input type="text" name="experienceSub" defaultValue={dbData?.hero?.experienceSub} className="mt-1.5 w-full rounded-xl border border-border px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Custom Hero Image URL (Optional)</label>
+                        <input type="text" placeholder="Default local asset used if empty" name="imageUrl" defaultValue={dbData?.hero?.imageUrl} className="mt-1.5 w-full rounded-xl border border-border px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary" />
+                      </div>
+                      <button type="submit" disabled={heroMutation.isPending} className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-semibold text-primary-foreground hover:bg-primary-hover shadow-soft">
+                        {heroMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                        Save Hero Section
+                      </button>
+                    </form>
+                  </div>
+
+                  {/* About Settings */}
+                  <div className="rounded-3xl border border-border bg-white p-6 shadow-soft">
+                    <h3 className="font-display text-lg font-bold text-foreground">Director's Biography (About Section)</h3>
+                    <p className="text-xs text-muted-foreground">Modify credentials, titles, bio paragraphs, and working partnerships.</p>
+                    <div className="mt-6 space-y-4">
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Director Name</label>
+                        <input type="text" id="about-name" defaultValue={dbData?.about?.name} className="mt-1.5 w-full rounded-xl border border-border px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Designation Subtitle</label>
+                        <input type="text" id="about-designation" defaultValue={dbData?.about?.designation} className="mt-1.5 w-full rounded-xl border border-border px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Biography Paragraph</label>
+                        <textarea rows={4} id="about-bio" defaultValue={dbData?.about?.bio} className="mt-1.5 w-full rounded-xl border border-border px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary resize-y" />
+                      </div>
+                      
+                      {/* Dynamic Credentials list */}
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Credentials Tags (e.g. Ph.D)</label>
+                          <button onClick={() => {
+                            const newCreds = [...aboutCredentials, ""];
+                            setAboutCredentials(newCreds);
+                          }} className="text-xs text-primary hover:underline flex items-center gap-0.5"><Plus className="h-3 w-3" /> Add</button>
+                        </div>
+                        <div className="mt-1.5 flex flex-wrap gap-2 max-h-32 overflow-y-auto border border-border p-2 rounded-xl">
+                          {aboutCredentials.map((c, idx) => (
+                            <div key={idx} className="flex items-center gap-1 bg-slate-50 border border-border rounded-lg px-2 py-1 text-xs">
+                              <input type="text" value={c} onChange={(e) => {
+                                const newCreds = [...aboutCredentials];
+                                newCreds[idx] = e.target.value;
+                                setAboutCredentials(newCreds);
+                              }} className="w-16 bg-transparent border-0 outline-none font-semibold text-foreground text-center" />
+                              <button onClick={() => {
+                                setAboutCredentials(aboutCredentials.filter((_, i) => i !== idx));
+                              }} className="text-muted-foreground hover:text-destructive"><X className="h-3 w-3" /></button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Dynamic Affiliations list */}
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Affiliated Organizations (Worked with)</label>
+                          <button onClick={() => {
+                            const newAff = [...aboutAffiliations, ""];
+                            setAboutAffiliations(newAff);
+                          }} className="text-xs text-primary hover:underline flex items-center gap-0.5"><Plus className="h-3 w-3" /> Add</button>
+                        </div>
+                        <div className="mt-1.5 flex flex-wrap gap-2 max-h-32 overflow-y-auto border border-border p-2 rounded-xl">
+                          {aboutAffiliations.map((a, idx) => (
+                            <div key={idx} className="flex items-center gap-1 bg-slate-50 border border-border rounded-lg px-2 py-1 text-xs">
+                              <input type="text" value={a} onChange={(e) => {
+                                const newAff = [...aboutAffiliations];
+                                newAff[idx] = e.target.value;
+                                setAboutAffiliations(newAff);
+                              }} className="w-32 bg-transparent border-0 outline-none font-semibold text-foreground text-center" />
+                              <button onClick={() => {
+                                setAboutAffiliations(aboutAffiliations.filter((_, i) => i !== idx));
+                              }} className="text-muted-foreground hover:text-destructive"><X className="h-3 w-3" /></button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Highlights Bullet points */}
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Highlights Bullet Points</label>
+                          <button onClick={() => {
+                            const newPoints = [...aboutBulletPoints, ""];
+                            setAboutBulletPoints(newPoints);
+                          }} className="text-xs text-primary hover:underline flex items-center gap-0.5"><Plus className="h-3 w-3" /> Add</button>
+                        </div>
+                        <div className="mt-1.5 space-y-2 max-h-40 overflow-y-auto">
+                          {aboutBulletPoints.map((bp, idx) => (
+                            <div key={idx} className="flex gap-2">
+                              <input type="text" value={bp} onChange={(e) => {
+                                const newPoints = [...aboutBulletPoints];
+                                newPoints[idx] = e.target.value;
+                                setAboutBulletPoints(newPoints);
+                              }} className="w-full rounded-xl border border-border px-3 py-2 text-xs text-foreground outline-none focus:border-primary" />
+                              <button onClick={() => {
+                                setAboutBulletPoints(aboutBulletPoints.filter((_, i) => i !== idx));
+                              }} className="rounded-lg p-2 text-muted-foreground hover:bg-slate-100 hover:text-destructive"><X className="h-4 w-4" /></button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Custom Biography Image URL (Optional)</label>
+                        <input type="text" placeholder="Default local asset used if empty" id="about-image-url" defaultValue={dbData?.about?.imageUrl} className="mt-1.5 w-full rounded-xl border border-border px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary" />
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          const name = (document.getElementById("about-name") as HTMLInputElement).value;
+                          const designation = (document.getElementById("about-designation") as HTMLInputElement).value;
+                          const bio = (document.getElementById("about-bio") as HTMLTextAreaElement).value;
+                          const imageUrl = (document.getElementById("about-image-url") as HTMLInputElement).value || "";
+                          
+                          aboutMutation.mutate({
+                            name,
+                            designation,
+                            bio,
+                            credentials: aboutCredentials.filter(Boolean),
+                            affiliations: aboutAffiliations.filter(Boolean),
+                            bulletPoints: aboutBulletPoints.filter(Boolean),
+                            imageUrl,
+                          });
+                        }}
+                        disabled={aboutMutation.isPending}
+                        className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-semibold text-primary-foreground hover:bg-primary-hover shadow-soft"
+                      >
+                        {aboutMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                        Save About Section
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}

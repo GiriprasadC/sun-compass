@@ -52,6 +52,26 @@ async function ensureDatabaseSeeded(database: Db) {
           instagram: "https://instagram.com",
           youtube: "https://youtube.com"
         },
+        hero: data.hero || {
+          badge: "Chennai · Since 1989",
+          title: "Empowering Research, Education & Professional Development",
+          subtitle: "SUN Academic Research & Training partners with educators, scholars and institutions to deliver rigorous doctoral guidance, teacher capacity building, psychological assessments and civil services coaching.",
+          experienceText: "35+ years",
+          experienceSub: "of academic excellence",
+          imageUrl: ""
+        },
+        about: data.about || {
+          name: "Prof. Dr. R. Rajendran",
+          designation: "Director, SUN Academic Research & Training, Chennai",
+          bio: "A distinguished academician whose career took shape at Annamalai University, rising to Professor & Head of the Centre for Educational Management and Applied Science. Over three and a half decades, he has shaped generations of teachers, scholars and civil service aspirants across South India.",
+          credentials: ["M.A.", "M.Ed.", "M.B.A.", "Ph.D.", "FBMS"],
+          affiliations: ["NITTTR", "Ministry of Education", "Tamil Nadu Government"],
+          bulletPoints: [
+            "35+ years of teaching, research and academic experience.",
+            "Guided 10 Candidates, 85 Research Scholars and numerous Ph.D. researchers."
+          ],
+          imageUrl: ""
+        },
         updatedAt: new Date().toISOString()
       };
       await settingsColl.insertOne(settingsDoc as any);

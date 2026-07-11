@@ -25,12 +25,30 @@ export interface DbData {
     phone: string;
     email: string;
     officeHours: string;
+    mapEmbedUrl?: string;
   };
   socialLinks: {
     facebook: string;
     linkedin: string;
     instagram: string;
     youtube: string;
+  };
+  hero: {
+    badge: string;
+    title: string;
+    subtitle: string;
+    experienceText: string;
+    experienceSub: string;
+    imageUrl?: string;
+  };
+  about: {
+    name: string;
+    designation: string;
+    bio: string;
+    credentials: string[];
+    affiliations: string[];
+    bulletPoints: string[];
+    imageUrl?: string;
   };
   enquiries: Array<{
     id: string;
@@ -143,13 +161,44 @@ const DEFAULT_DB_DATA: DbData = {
     address: "No.104/1, A.K. Swamy Nagar, 7th Street, Kilpauk, Chennai – 600010",
     phone: "98403 41412",
     email: "rajendra1234@gmail.com",
-    officeHours: "9:00 AM – 8:00 PM (All Days)"
+    officeHours: "9:00 AM – 8:00 PM (All Days)",
+    mapEmbedUrl: ""
   },
   socialLinks: {
     facebook: "https://facebook.com",
     linkedin: "https://linkedin.com",
     instagram: "https://instagram.com",
     youtube: "https://youtube.com"
+  },
+  hero: {
+    badge: "Chennai · Since 1989",
+    title: "Empowering Research, Education & Professional Development",
+    subtitle: "SUN Academic Research & Training partners with educators, scholars and institutions to deliver rigorous doctoral guidance, teacher capacity building, psychological assessments and civil services coaching.",
+    experienceText: "35+ years",
+    experienceSub: "of academic excellence",
+    imageUrl: ""
+  },
+  about: {
+    name: "Prof. Dr. R. Rajendran",
+    designation: "Director, SUN Academic Research & Training, Chennai",
+    bio: "A distinguished academician whose career took shape at Annamalai University, rising to Professor & Head of the Centre for Educational Management and Applied Science. Over three and a half decades, he has shaped generations of teachers, scholars and civil service aspirants across South India.",
+    credentials: [
+      "M.A.",
+      "M.Ed.",
+      "M.B.A.",
+      "Ph.D.",
+      "FBMS"
+    ],
+    affiliations: [
+      "NITTTR",
+      "Ministry of Education",
+      "Tamil Nadu Government"
+    ],
+    bulletPoints: [
+      "35+ years of teaching, research and academic experience.",
+      "Guided 10 Candidates, 85 Research Scholars and numerous Ph.D. researchers."
+    ],
+    imageUrl: ""
   },
   enquiries: []
 };
@@ -166,7 +215,7 @@ async function readFallbackJson(): Promise<DbData> {
     const raw = await fs.readFile(dbPath, "utf-8");
     return JSON.parse(raw) as DbData;
   } catch (err) {
-    console.warn("Failed to read fallback JSON db (non-Node environment or missing file?). Returning built-in defaults:", (err as Error).message || err);
+    console.warn("Failed to read fallback JSON db. Returning defaults:", (err as Error).message || err);
     return DEFAULT_DB_DATA;
   }
 }
@@ -181,7 +230,7 @@ async function writeFallbackJson(data: DbData): Promise<void> {
     
     await fs.writeFile(dbPath, JSON.stringify(data, null, 2), "utf-8");
   } catch (err) {
-    console.error("Failed to write fallback JSON db (non-Node environment or read-only filesystem?):", (err as Error).message || err);
+    console.error("Failed to write fallback JSON db:", (err as Error).message || err);
   }
 }
 
@@ -204,12 +253,16 @@ export const getDbData = createServerFn({ method: "GET" })
       const services = settingsDoc?.services || DEFAULT_DB_DATA.services;
       const contactInfo = settingsDoc?.contactInfo || DEFAULT_DB_DATA.contactInfo;
       const socialLinks = settingsDoc?.socialLinks || DEFAULT_DB_DATA.socialLinks;
+      const hero = settingsDoc?.hero || DEFAULT_DB_DATA.hero;
+      const about = settingsDoc?.about || DEFAULT_DB_DATA.about;
 
       return {
         stats,
         services,
         contactInfo,
         socialLinks,
+        hero,
+        about,
         enquiries
       } as DbData;
     } catch (err) {
@@ -230,7 +283,7 @@ export const updateStats = createServerFn({ method: "POST" })
         { $set: { stats, updatedAt: new Date().toISOString() } }
       );
     } catch (err) {
-      console.warn("MongoDB update stats failed, falling back to local JSON file db:", (err as Error).message || err);
+      console.warn("MongoDB update stats failed, falling back to local JSON db:", (err as Error).message || err);
       const data = await readFallbackJson();
       data.stats = stats;
       await writeFallbackJson(data);
@@ -250,7 +303,7 @@ export const updateServices = createServerFn({ method: "POST" })
         { $set: { services, updatedAt: new Date().toISOString() } }
       );
     } catch (err) {
-      console.warn("MongoDB update services failed, falling back to local JSON file db:", (err as Error).message || err);
+      console.warn("MongoDB update services failed, falling back to local JSON db:", (err as Error).message || err);
       const data = await readFallbackJson();
       data.services = services;
       await writeFallbackJson(data);
@@ -270,7 +323,7 @@ export const updateContactInfo = createServerFn({ method: "POST" })
         { $set: { contactInfo, updatedAt: new Date().toISOString() } }
       );
     } catch (err) {
-      console.warn("MongoDB update contact info failed, falling back to local JSON file db:", (err as Error).message || err);
+      console.warn("MongoDB update contact info failed, falling back to local JSON db:", (err as Error).message || err);
       const data = await readFallbackJson();
       data.contactInfo = contactInfo;
       await writeFallbackJson(data);
@@ -290,9 +343,49 @@ export const updateSocialLinks = createServerFn({ method: "POST" })
         { $set: { socialLinks, updatedAt: new Date().toISOString() } }
       );
     } catch (err) {
-      console.warn("MongoDB update social links failed, falling back to local JSON file db:", (err as Error).message || err);
+      console.warn("MongoDB update social links failed, falling back to local JSON db:", (err as Error).message || err);
       const data = await readFallbackJson();
       data.socialLinks = socialLinks;
+      await writeFallbackJson(data);
+    }
+    return { success: true };
+  });
+
+export const updateHero = createServerFn({ method: "POST" })
+  .validator((hero: DbData["hero"]) => hero)
+  .handler(async ({ data: hero }) => {
+    try {
+      const { connectToDatabase } = await import("./mongodb.server");
+      const { db } = await connectToDatabase();
+
+      await db.collection("settings").updateOne(
+        { _id: "global_settings" as any },
+        { $set: { hero, updatedAt: new Date().toISOString() } }
+      );
+    } catch (err) {
+      console.warn("MongoDB update hero failed, falling back to local JSON db:", (err as Error).message || err);
+      const data = await readFallbackJson();
+      data.hero = hero;
+      await writeFallbackJson(data);
+    }
+    return { success: true };
+  });
+
+export const updateAbout = createServerFn({ method: "POST" })
+  .validator((about: DbData["about"]) => about)
+  .handler(async ({ data: about }) => {
+    try {
+      const { connectToDatabase } = await import("./mongodb.server");
+      const { db } = await connectToDatabase();
+
+      await db.collection("settings").updateOne(
+        { _id: "global_settings" as any },
+        { $set: { about, updatedAt: new Date().toISOString() } }
+      );
+    } catch (err) {
+      console.warn("MongoDB update about failed, falling back to local JSON db:", (err as Error).message || err);
+      const data = await readFallbackJson();
+      data.about = about;
       await writeFallbackJson(data);
     }
     return { success: true };
@@ -313,7 +406,7 @@ export const submitEnquiry = createServerFn({ method: "POST" })
 
       await db.collection("enquiries").insertOne(newEnquiry);
     } catch (err) {
-      console.warn("MongoDB submit enquiry failed, falling back to local JSON file db:", (err as Error).message || err);
+      console.warn("MongoDB submit enquiry failed, falling back to local JSON db:", (err as Error).message || err);
       const data = await readFallbackJson();
       data.enquiries = [newEnquiry, ...(data.enquiries || [])];
       await writeFallbackJson(data);
@@ -330,7 +423,7 @@ export const deleteEnquiry = createServerFn({ method: "POST" })
 
       await db.collection("enquiries").deleteOne({ id });
     } catch (err) {
-      console.warn("MongoDB delete enquiry failed, falling back to local JSON file db:", (err as Error).message || err);
+      console.warn("MongoDB delete enquiry failed, falling back to local JSON db:", (err as Error).message || err);
       const data = await readFallbackJson();
       data.enquiries = (data.enquiries || []).filter((e) => e.id !== id);
       await writeFallbackJson(data);
