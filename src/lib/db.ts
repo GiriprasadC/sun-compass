@@ -430,3 +430,30 @@ export const deleteEnquiry = createServerFn({ method: "POST" })
     }
     return { success: true };
   });
+
+export const uploadImage = createServerFn({ method: "POST" })
+  .validator((data: { filename: string; mimeType: string; base64Data: string }) => data)
+  .handler(async ({ data }) => {
+    try {
+      const fs = await import("node:fs/promises");
+      const path = await import("node:path");
+
+      const buffer = Buffer.from(data.base64Data, "base64");
+      const ext = path.extname(data.filename) || ".jpg";
+      const filename = `${Math.random().toString(36).substring(2, 9)}${ext}`;
+      
+      const cwd = typeof process !== "undefined" && typeof process.cwd === "function" ? process.cwd() : ".";
+      const uploadDir = path.resolve(cwd, "public/uploads");
+      
+      // Ensure uploads directory exists
+      await fs.mkdir(uploadDir, { recursive: true });
+      
+      const filePath = path.resolve(uploadDir, filename);
+      await fs.writeFile(filePath, buffer);
+      
+      return { success: true, url: `/uploads/${filename}` };
+    } catch (err) {
+      console.error("Failed to upload image:", err);
+      return { success: false, error: (err as Error).message || String(err) };
+    }
+  });

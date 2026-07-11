@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getDbData, updateStats, updateServices, updateContactInfo, updateSocialLinks, deleteEnquiry, updateHero, updateAbout, type DbData } from "@/lib/db";
+import { getDbData, updateStats, updateServices, updateContactInfo, updateSocialLinks, deleteEnquiry, updateHero, updateAbout, uploadImage, type DbData } from "@/lib/db";
 import { Container } from "@/components/ui/Container";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -1129,29 +1129,35 @@ function AdminPage() {
                               type="file"
                               accept="image/*"
                               className="hidden"
-                              onChange={async (e) => {
+                              onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (!file) return;
                                 setIsHeroUploading(true);
-                                const fd = new FormData();
-                                fd.append("file", file);
-                                try {
-                                  const uploadRes = await fetch("/api/upload", {
-                                    method: "POST",
-                                    body: fd,
-                                  });
-                                  const res = await uploadRes.json();
-                                  if (res.success && res.url) {
-                                    setHeroImageUrl(res.url);
-                                    toast.success("Hero image uploaded successfully");
-                                  } else {
-                                    toast.error(res.error || "Failed to upload image");
+
+                                const reader = new FileReader();
+                                reader.onload = async (event) => {
+                                  const base64Data = (event.target?.result as string).split(",")[1];
+                                  try {
+                                    const res = await uploadImage({
+                                      data: {
+                                        filename: file.name,
+                                        mimeType: file.type,
+                                        base64Data,
+                                      }
+                                    });
+                                    if (res.success && res.url) {
+                                      setHeroImageUrl(res.url);
+                                      toast.success("Hero image uploaded successfully");
+                                    } else {
+                                      toast.error(res.error || "Failed to upload image");
+                                    }
+                                  } catch (err) {
+                                    toast.error("Error uploading image");
+                                  } finally {
+                                    setIsHeroUploading(false);
                                   }
-                                } catch (err) {
-                                  toast.error("Error uploading image");
-                                } finally {
-                                  setIsHeroUploading(false);
-                                }
+                                };
+                                reader.readAsDataURL(file);
                               }}
                             />
                           </label>
@@ -1289,29 +1295,35 @@ function AdminPage() {
                               type="file"
                               accept="image/*"
                               className="hidden"
-                              onChange={async (e) => {
+                              onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (!file) return;
                                 setIsAboutUploading(true);
-                                const fd = new FormData();
-                                fd.append("file", file);
-                                try {
-                                  const uploadRes = await fetch("/api/upload", {
-                                    method: "POST",
-                                    body: fd,
-                                  });
-                                  const res = await uploadRes.json();
-                                  if (res.success && res.url) {
-                                    setAboutImageUrl(res.url);
-                                    toast.success("Biography image uploaded successfully");
-                                  } else {
-                                    toast.error(res.error || "Failed to upload image");
+
+                                const reader = new FileReader();
+                                reader.onload = async (event) => {
+                                  const base64Data = (event.target?.result as string).split(",")[1];
+                                  try {
+                                    const res = await uploadImage({
+                                      data: {
+                                        filename: file.name,
+                                        mimeType: file.type,
+                                        base64Data,
+                                      }
+                                    });
+                                    if (res.success && res.url) {
+                                      setAboutImageUrl(res.url);
+                                      toast.success("Biography image uploaded successfully");
+                                    } else {
+                                      toast.error(res.error || "Failed to upload image");
+                                    }
+                                  } catch (err) {
+                                    toast.error("Error uploading image");
+                                  } finally {
+                                    setIsAboutUploading(false);
                                   }
-                                } catch (err) {
-                                  toast.error("Error uploading image");
-                                } finally {
-                                  setIsAboutUploading(false);
-                                }
+                                };
+                                reader.readAsDataURL(file);
                               }}
                             />
                           </label>
