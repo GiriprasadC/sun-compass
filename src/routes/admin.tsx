@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getDbData, updateStats, updateServices, updateContactInfo, updateSocialLinks, deleteEnquiry, updateHero, updateAbout, type DbData } from "@/lib/db";
+import { getDbData, updateStats, updateServices, updateContactInfo, updateSocialLinks, deleteEnquiry, updateHero, updateAbout, uploadImage, type DbData } from "@/lib/db";
 import { Container } from "@/components/ui/Container";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -27,7 +27,8 @@ import {
   ExternalLink,
   ChevronRight,
   X,
-  Info
+  Info,
+  Upload
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -154,16 +155,24 @@ function AdminPage() {
   const [aboutCredentials, setAboutCredentials] = useState<string[]>([]);
   const [aboutAffiliations, setAboutAffiliations] = useState<string[]>([]);
   const [aboutBulletPoints, setAboutBulletPoints] = useState<string[]>([]);
+  const [heroImageUrl, setHeroImageUrl] = useState("");
+  const [aboutImageUrl, setAboutImageUrl] = useState("");
+  const [isHeroUploading, setIsHeroUploading] = useState(false);
+  const [isAboutUploading, setIsAboutUploading] = useState(false);
 
   // Sync server data to local edit forms
   useEffect(() => {
     if (dbData?.services) {
       setLocalServices(dbData.services);
     }
+    if (dbData?.hero) {
+      setHeroImageUrl(dbData.hero.imageUrl || "");
+    }
     if (dbData?.about) {
       setAboutCredentials(dbData.about.credentials || []);
       setAboutAffiliations(dbData.about.affiliations || []);
       setAboutBulletPoints(dbData.about.bulletPoints || []);
+      setAboutImageUrl(dbData.about.imageUrl || "");
     }
   }, [dbData]);
 
@@ -1072,7 +1081,7 @@ function AdminPage() {
                           subtitle: formData.get("subtitle") as string,
                           experienceText: formData.get("experienceText") as string,
                           experienceSub: formData.get("experienceSub") as string,
-                          imageUrl: formData.get("imageUrl") as string || "",
+                          imageUrl: heroImageUrl,
                         };
                         heroMutation.mutate(data);
                       }}
@@ -1101,8 +1110,60 @@ function AdminPage() {
                         </div>
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Custom Hero Image URL (Optional)</label>
-                        <input type="text" placeholder="Default local asset used if empty" name="imageUrl" defaultValue={dbData?.hero?.imageUrl} className="mt-1.5 w-full rounded-xl border border-border px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary" />
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Hero Image</label>
+                        <div className="flex gap-2 mt-1.5">
+                          <input
+                            type="text"
+                            placeholder="Default local asset used if empty"
+                            value={heroImageUrl}
+                            onChange={(e) => setHeroImageUrl(e.target.value)}
+                            className="w-full rounded-xl border border-border px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                          />
+                          <label className="flex cursor-pointer items-center justify-center rounded-xl border border-border bg-slate-50 px-4 py-2 hover:bg-slate-100 transition-colors">
+                            {isHeroUploading ? (
+                              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                            ) : (
+                              <Upload className="h-4 w-4 text-muted-foreground" />
+                            )}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                setIsHeroUploading(true);
+                                const fd = new FormData();
+                                fd.append("file", file);
+                                try {
+                                  const res = await uploadImage({ data: fd });
+                                  if (res.success && res.url) {
+                                    setHeroImageUrl(res.url);
+                                    toast.success("Hero image uploaded successfully");
+                                  } else {
+                                    toast.error((res as any).error || "Failed to upload image");
+                                  }
+                                } catch (err) {
+                                  toast.error("Error uploading image");
+                                } finally {
+                                  setIsHeroUploading(false);
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+                        {heroImageUrl && (
+                          <div className="mt-2 relative h-20 w-32 rounded-xl overflow-hidden border border-border">
+                            <img src={heroImageUrl} className="h-full w-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => setHeroImageUrl("")}
+                              className="absolute top-1 right-1 rounded-full bg-black/60 p-1 text-white hover:bg-black/80"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        )}
                       </div>
                       <button type="submit" disabled={heroMutation.isPending} className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-semibold text-primary-foreground hover:bg-primary-hover shadow-soft">
                         {heroMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
@@ -1205,8 +1266,60 @@ function AdminPage() {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Custom Biography Image URL (Optional)</label>
-                        <input type="text" placeholder="Default local asset used if empty" id="about-image-url" defaultValue={dbData?.about?.imageUrl} className="mt-1.5 w-full rounded-xl border border-border px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary" />
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Biography Image</label>
+                        <div className="flex gap-2 mt-1.5">
+                          <input
+                            type="text"
+                            placeholder="Default local asset used if empty"
+                            value={aboutImageUrl}
+                            onChange={(e) => setAboutImageUrl(e.target.value)}
+                            className="w-full rounded-xl border border-border px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                          />
+                          <label className="flex cursor-pointer items-center justify-center rounded-xl border border-border bg-slate-50 px-4 py-2 hover:bg-slate-100 transition-colors">
+                            {isAboutUploading ? (
+                              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                            ) : (
+                              <Upload className="h-4 w-4 text-muted-foreground" />
+                            )}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                setIsAboutUploading(true);
+                                const fd = new FormData();
+                                fd.append("file", file);
+                                try {
+                                  const res = await uploadImage({ data: fd });
+                                  if (res.success && res.url) {
+                                    setAboutImageUrl(res.url);
+                                    toast.success("Biography image uploaded successfully");
+                                  } else {
+                                    toast.error((res as any).error || "Failed to upload image");
+                                  }
+                                } catch (err) {
+                                  toast.error("Error uploading image");
+                                } finally {
+                                  setIsAboutUploading(false);
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+                        {aboutImageUrl && (
+                          <div className="mt-2 relative h-20 w-32 rounded-xl overflow-hidden border border-border">
+                            <img src={aboutImageUrl} className="h-full w-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => setAboutImageUrl("")}
+                              className="absolute top-1 right-1 rounded-full bg-black/60 p-1 text-white hover:bg-black/80"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                       <button
@@ -1214,7 +1327,6 @@ function AdminPage() {
                           const name = (document.getElementById("about-name") as HTMLInputElement).value;
                           const designation = (document.getElementById("about-designation") as HTMLInputElement).value;
                           const bio = (document.getElementById("about-bio") as HTMLTextAreaElement).value;
-                          const imageUrl = (document.getElementById("about-image-url") as HTMLInputElement).value || "";
                           
                           aboutMutation.mutate({
                             name,
@@ -1223,7 +1335,7 @@ function AdminPage() {
                             credentials: aboutCredentials.filter(Boolean),
                             affiliations: aboutAffiliations.filter(Boolean),
                             bulletPoints: aboutBulletPoints.filter(Boolean),
-                            imageUrl,
+                            imageUrl: aboutImageUrl,
                           });
                         }}
                         disabled={aboutMutation.isPending}
