@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getDbData, updateStats, updateServices, updateContactInfo, updateSocialLinks, deleteEnquiry, updateHero, updateAbout, uploadImage, type DbData } from "@/lib/db";
+import { getDbData, updateStats, updateServices, updateContactInfo, updateSocialLinks, deleteEnquiry, updateHero, updateAbout, type DbData } from "@/lib/db";
 import { Container } from "@/components/ui/Container";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -1136,12 +1136,16 @@ function AdminPage() {
                                 const fd = new FormData();
                                 fd.append("file", file);
                                 try {
-                                  const res = await uploadImage({ data: fd });
+                                  const uploadRes = await fetch("/api/upload", {
+                                    method: "POST",
+                                    body: fd,
+                                  });
+                                  const res = await uploadRes.json();
                                   if (res.success && res.url) {
                                     setHeroImageUrl(res.url);
                                     toast.success("Hero image uploaded successfully");
                                   } else {
-                                    toast.error((res as any).error || "Failed to upload image");
+                                    toast.error(res.error || "Failed to upload image");
                                   }
                                 } catch (err) {
                                   toast.error("Error uploading image");
@@ -1292,12 +1296,16 @@ function AdminPage() {
                                 const fd = new FormData();
                                 fd.append("file", file);
                                 try {
-                                  const res = await uploadImage({ data: fd });
+                                  const uploadRes = await fetch("/api/upload", {
+                                    method: "POST",
+                                    body: fd,
+                                  });
+                                  const res = await uploadRes.json();
                                   if (res.success && res.url) {
                                     setAboutImageUrl(res.url);
                                     toast.success("Biography image uploaded successfully");
                                   } else {
-                                    toast.error((res as any).error || "Failed to upload image");
+                                    toast.error(res.error || "Failed to upload image");
                                   }
                                 } catch (err) {
                                   toast.error("Error uploading image");
