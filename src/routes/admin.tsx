@@ -1163,58 +1163,54 @@ function AdminPage() {
                       </div>
                       <div>
                         <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Hero Image</label>
-                        <div className="flex gap-2 mt-1.5">
-                          <input
-                            type="text"
-                            placeholder="Default local asset used if empty"
-                            value={heroImageUrl}
-                            onChange={(e) => setHeroImageUrl(e.target.value)}
-                            className="w-full rounded-xl border border-border px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
-                          />
-                          <label className="flex cursor-pointer items-center justify-center rounded-xl border border-border bg-slate-50 px-4 py-2 hover:bg-slate-100 transition-colors">
-                            {isHeroUploading ? (
-                              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                            ) : (
-                              <Upload className="h-4 w-4 text-muted-foreground" />
-                            )}
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (!file) return;
-                                setIsHeroUploading(true);
+                        <div className="mt-1.5 space-y-3">
+                          {/* Dedicated Upload File Option */}
+                          <div className="flex items-center gap-3">
+                            <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-2xl p-5 bg-slate-50 hover:bg-slate-100/50 hover:border-primary/50 cursor-pointer transition-all">
+                              {isHeroUploading ? (
+                                <Loader2 className="h-6 w-6 animate-spin text-primary mb-1.5" />
+                              ) : (
+                                <Upload className="h-6 w-6 text-muted-foreground mb-1.5" />
+                              )}
+                              <span className="text-xs font-semibold text-foreground">Upload Image File</span>
+                              <span className="text-[10px] text-muted-foreground mt-0.5">Supports any resolution (auto-resized to frame)</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  setIsHeroUploading(true);
 
-                                resizeImage(file, 1200, 1200)
-                                  .then(async ({ base64Data, mimeType }) => {
-                                    try {
-                                      const res = await uploadImage({
-                                        data: {
-                                          filename: file.name,
-                                          mimeType,
-                                          base64Data,
-                                        }
-                                      });
-                                      if (res.success && res.url) {
-                                        setHeroImageUrl(res.url);
-                                        toast.success("Hero image uploaded successfully");
-                                      } else {
-                                        toast.error(res.error || "Failed to upload image");
-                                      }
-                                    } catch (err) {
-                                      toast.error("Error uploading image");
-                                    } finally {
+                                  resizeImage(file, 1200, 1200)
+                                    .then(({ base64Data, mimeType }) => {
+                                      const dataUri = `data:${mimeType};base64,${base64Data}`;
+                                      setHeroImageUrl(dataUri);
+                                      toast.success("Image uploaded and path updated automatically!");
+                                    })
+                                    .catch((err) => {
+                                      toast.error("Failed to process image: " + err.message);
+                                    })
+                                    .finally(() => {
                                       setIsHeroUploading(false);
-                                    }
-                                  })
-                                  .catch((err) => {
-                                    toast.error("Failed to process image: " + err.message);
-                                    setIsHeroUploading(false);
-                                  });
-                              }}
+                                    });
+                                }}
+                              />
+                            </label>
+                          </div>
+
+                          {/* Path Field */}
+                          <div>
+                            <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Image Path / Data URI</div>
+                            <input
+                              type="text"
+                              placeholder="Default local asset used if empty"
+                              value={heroImageUrl}
+                              onChange={(e) => setHeroImageUrl(e.target.value)}
+                              className="w-full rounded-xl border border-border px-3 py-2 text-xs text-foreground outline-none focus:border-primary"
                             />
-                          </label>
+                          </div>
                         </div>
                         {isValidUrl(heroImageUrl) && (
                           <div className="mt-2 relative h-20 w-32 rounded-xl overflow-hidden border border-border">
@@ -1331,58 +1327,54 @@ function AdminPage() {
 
                       <div>
                         <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Biography Image</label>
-                        <div className="flex gap-2 mt-1.5">
-                          <input
-                            type="text"
-                            placeholder="Default local asset used if empty"
-                            value={aboutImageUrl}
-                            onChange={(e) => setAboutImageUrl(e.target.value)}
-                            className="w-full rounded-xl border border-border px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
-                          />
-                          <label className="flex cursor-pointer items-center justify-center rounded-xl border border-border bg-slate-50 px-4 py-2 hover:bg-slate-100 transition-colors">
-                            {isAboutUploading ? (
-                              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                            ) : (
-                              <Upload className="h-4 w-4 text-muted-foreground" />
-                            )}
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (!file) return;
-                                setIsAboutUploading(true);
+                        <div className="mt-1.5 space-y-3">
+                          {/* Dedicated Upload File Option */}
+                          <div className="flex items-center gap-3">
+                            <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-2xl p-5 bg-slate-50 hover:bg-slate-100/50 hover:border-primary/50 cursor-pointer transition-all">
+                              {isAboutUploading ? (
+                                <Loader2 className="h-6 w-6 animate-spin text-primary mb-1.5" />
+                              ) : (
+                                <Upload className="h-6 w-6 text-muted-foreground mb-1.5" />
+                              )}
+                              <span className="text-xs font-semibold text-foreground">Upload Image File</span>
+                              <span className="text-[10px] text-muted-foreground mt-0.5">Supports any resolution (auto-resized to frame)</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  setIsAboutUploading(true);
 
-                                resizeImage(file, 1200, 1200)
-                                  .then(async ({ base64Data, mimeType }) => {
-                                    try {
-                                      const res = await uploadImage({
-                                        data: {
-                                          filename: file.name,
-                                          mimeType,
-                                          base64Data,
-                                        }
-                                      });
-                                      if (res.success && res.url) {
-                                        setAboutImageUrl(res.url);
-                                        toast.success("Biography image uploaded successfully");
-                                      } else {
-                                        toast.error(res.error || "Failed to upload image");
-                                      }
-                                    } catch (err) {
-                                      toast.error("Error uploading image");
-                                    } finally {
+                                  resizeImage(file, 1200, 1200)
+                                    .then(({ base64Data, mimeType }) => {
+                                      const dataUri = `data:${mimeType};base64,${base64Data}`;
+                                      setAboutImageUrl(dataUri);
+                                      toast.success("Image uploaded and path updated automatically!");
+                                    })
+                                    .catch((err) => {
+                                      toast.error("Failed to process image: " + err.message);
+                                    })
+                                    .finally(() => {
                                       setIsAboutUploading(false);
-                                    }
-                                  })
-                                  .catch((err) => {
-                                    toast.error("Failed to process image: " + err.message);
-                                    setIsAboutUploading(false);
-                                  });
-                              }}
+                                    });
+                                }}
+                              />
+                            </label>
+                          </div>
+
+                          {/* Path Field */}
+                          <div>
+                            <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Image Path / Data URI</div>
+                            <input
+                              type="text"
+                              placeholder="Default local asset used if empty"
+                              value={aboutImageUrl}
+                              onChange={(e) => setAboutImageUrl(e.target.value)}
+                              className="w-full rounded-xl border border-border px-3 py-2 text-xs text-foreground outline-none focus:border-primary"
                             />
-                          </label>
+                          </div>
                         </div>
                         {isValidUrl(aboutImageUrl) && (
                           <div className="mt-2 relative h-20 w-32 rounded-xl overflow-hidden border border-border">
