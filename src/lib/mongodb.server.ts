@@ -1,6 +1,4 @@
 import { MongoClient, Db } from "mongodb";
-import * as fs from "node:fs/promises";
-import * as path from "node:path";
 
 const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/sun-compass";
 
@@ -13,7 +11,13 @@ async function ensureDatabaseSeeded(database: Db) {
     const count = await settingsColl.countDocuments();
     if (count === 0) {
       console.log("MongoDB 'settings' collection is empty. Seeding initial data from db.json...");
-      const dbJsonPath = path.resolve(process.cwd(), "src/data/db.json");
+      
+      // Load Node modules dynamically to prevent loading errors in environments without fs support (e.g. Cloudflare)
+      const fs = await import("node:fs/promises");
+      const path = await import("node:path");
+      
+      const cwd = typeof process !== "undefined" && typeof process.cwd === "function" ? process.cwd() : ".";
+      const dbJsonPath = path.resolve(cwd, "src/data/db.json");
       
       let rawData: string;
       try {
@@ -68,11 +72,13 @@ export async function connectToDatabase(): Promise<{ client: MongoClient; db: Db
     return { client: cachedClient, db: cachedDb };
   }
 
-  // Extract host/database info from URI safely for logging
   const safeLogUri = uri.includes("@") ? uri.split("@")[1] : uri;
   console.log("Connecting to MongoDB database at:", safeLogUri);
 
-  const client = new MongoClient(uri);
+  const client = new MongoClient(uri, {
+    connectTimeoutMS: 2000,
+    serverSelectionTimeoutMS: 2000,
+  });
   await client.connect();
   const db = client.db();
 
