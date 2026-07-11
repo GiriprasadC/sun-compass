@@ -31,6 +31,12 @@ import {
   Upload
 } from "lucide-react";
 
+function isValidUrl(url?: string): boolean {
+  if (!url) return false;
+  const cleanUrl = url.trim();
+  return cleanUrl.startsWith("/") || cleanUrl.startsWith("http://") || cleanUrl.startsWith("https://") || cleanUrl.startsWith("data:");
+}
+
 function resizeImage(file: File, maxWidth: number, maxHeight: number): Promise<{ base64Data: string; mimeType: string }> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -1210,7 +1216,7 @@ function AdminPage() {
                             />
                           </label>
                         </div>
-                        {heroImageUrl && (
+                        {isValidUrl(heroImageUrl) && (
                           <div className="mt-2 relative h-20 w-32 rounded-xl overflow-hidden border border-border">
                             <img src={heroImageUrl} className="h-full w-full object-cover" />
                             <button
@@ -1378,7 +1384,7 @@ function AdminPage() {
                             />
                           </label>
                         </div>
-                        {aboutImageUrl && (
+                        {isValidUrl(aboutImageUrl) && (
                           <div className="mt-2 relative h-20 w-32 rounded-xl overflow-hidden border border-border">
                             <img src={aboutImageUrl} className="h-full w-full object-cover" />
                             <button

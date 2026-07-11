@@ -25,7 +25,13 @@ export function About() {
     imageUrl: ""
   };
 
-  const displayImage = about.imageUrl || directorImg;
+  const isValidUrl = (url?: string) => {
+    if (!url) return false;
+    const cleanUrl = url.trim();
+    return cleanUrl.startsWith("/") || cleanUrl.startsWith("http://") || cleanUrl.startsWith("https://") || cleanUrl.startsWith("data:");
+  };
+
+  const displayImage = isValidUrl(about.imageUrl) && about.imageUrl ? about.imageUrl.trim() : directorImg;
   const icons = [Building2, Landmark, Flag];
 
   return (

@@ -21,7 +21,13 @@ export function Hero() {
     imageUrl: ""
   };
 
-  const displayImage = hero.imageUrl || heroImg;
+  const isValidUrl = (url?: string) => {
+    if (!url) return false;
+    const cleanUrl = url.trim();
+    return cleanUrl.startsWith("/") || cleanUrl.startsWith("http://") || cleanUrl.startsWith("https://") || cleanUrl.startsWith("data:");
+  };
+
+  const displayImage = isValidUrl(hero.imageUrl) && hero.imageUrl ? hero.imageUrl.trim() : heroImg;
 
   const renderTitle = () => {
     const highlightText = "Professional Development";
