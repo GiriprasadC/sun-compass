@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getDbData, updateStats, updateServices, updateContactInfo, updateSocialLinks, deleteEnquiry, updateHero, updateAbout, updateSectionOrder, updateConsultationWidget, getDbStatus, type DbData } from "@/lib/db";
+import { getDbData, updateStats, updateServices, updateContactInfo, updateSocialLinks, deleteEnquiry, updateHero, updateAbout, updateSectionOrder, updateConsultationWidget, getDbStatus, uploadImage, type DbData } from "@/lib/db";
 import { Container } from "@/components/ui/Container";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -1336,10 +1336,30 @@ function AdminPage() {
                                   setIsHeroUploading(true);
 
                                   resizeImage(file, 1200, 1200)
-                                    .then(({ base64Data, mimeType }) => {
-                                      const dataUri = `data:${mimeType};base64,${base64Data}`;
-                                      setHeroImageUrl(dataUri);
-                                      toast.success("Image uploaded and path updated automatically!");
+                                    .then(async ({ base64Data, mimeType }) => {
+                                      try {
+                                        const res = await uploadImage({
+                                          data: {
+                                            filename: file.name,
+                                            mimeType: mimeType,
+                                            base64Data: base64Data
+                                          }
+                                        });
+                                        if (res.success && res.url) {
+                                          setHeroImageUrl(res.url);
+                                          toast.success("Image uploaded and saved to server uploads!");
+                                        } else {
+                                          // Fallback to data URI if server upload is disabled/fails (e.g. read-only host)
+                                          const dataUri = `data:${mimeType};base64,${base64Data}`;
+                                          setHeroImageUrl(dataUri);
+                                          toast.success("Image processed client-side (saved as Data URI)");
+                                        }
+                                      } catch (err) {
+                                        // Fallback to data URI on error
+                                        const dataUri = `data:${mimeType};base64,${base64Data}`;
+                                        setHeroImageUrl(dataUri);
+                                        toast.success("Image processed client-side (saved as Data URI)");
+                                      }
                                     })
                                     .catch((err) => {
                                       toast.error("Failed to process image: " + err.message);
@@ -1500,10 +1520,30 @@ function AdminPage() {
                                   setIsAboutUploading(true);
 
                                   resizeImage(file, 1200, 1200)
-                                    .then(({ base64Data, mimeType }) => {
-                                      const dataUri = `data:${mimeType};base64,${base64Data}`;
-                                      setAboutImageUrl(dataUri);
-                                      toast.success("Image uploaded and path updated automatically!");
+                                    .then(async ({ base64Data, mimeType }) => {
+                                      try {
+                                        const res = await uploadImage({
+                                          data: {
+                                            filename: file.name,
+                                            mimeType: mimeType,
+                                            base64Data: base64Data
+                                          }
+                                        });
+                                        if (res.success && res.url) {
+                                          setAboutImageUrl(res.url);
+                                          toast.success("Image uploaded and saved to server uploads!");
+                                        } else {
+                                          // Fallback to data URI if server upload is disabled/fails (e.g. read-only host)
+                                          const dataUri = `data:${mimeType};base64,${base64Data}`;
+                                          setAboutImageUrl(dataUri);
+                                          toast.success("Image processed client-side (saved as Data URI)");
+                                        }
+                                      } catch (err) {
+                                        // Fallback to data URI on error
+                                        const dataUri = `data:${mimeType};base64,${base64Data}`;
+                                        setAboutImageUrl(dataUri);
+                                        toast.success("Image processed client-side (saved as Data URI)");
+                                      }
                                     })
                                     .catch((err) => {
                                       toast.error("Failed to process image: " + err.message);
