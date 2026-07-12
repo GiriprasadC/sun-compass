@@ -69,11 +69,7 @@ export function About() {
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <SectionHeading eyebrow="About Us" title={about.name} />
-
-          <p className="mt-3 text-sm font-semibold tracking-wide text-foreground/80">
-            {about.credentials.join("  •  ")}
-          </p>
+          <SectionHeading eyebrow="About Us" title={`${about.name}, ${about.credentials.join(", ")}`} />
 
           <p className="mt-2 text-sm font-medium uppercase tracking-wider text-primary font-display">
             {about.designation}
@@ -106,8 +102,7 @@ export function About() {
           {about.bulletPoints.length > 0 && (
             <ul className="mt-6 space-y-2 text-sm text-muted-foreground">
               {about.bulletPoints.map((point, idx) => (
-                <li key={idx} className="flex gap-2">
-                  <span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                <li key={idx}>
                   {point}
                 </li>
               ))}
