@@ -11,7 +11,7 @@ export function ServiceModal({ service, open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+      <DialogContent className="h-[calc(100vh-2rem)] max-h-none w-[calc(100vw-2rem)] max-w-none overflow-y-auto rounded-3xl sm:rounded-3xl">
         <DialogHeader>
           <div className="mb-3 grid h-12 w-12 place-items-center rounded-xl bg-primary-tint text-primary">
             <Icon className="h-6 w-6" />
