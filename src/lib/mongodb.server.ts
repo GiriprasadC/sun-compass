@@ -72,6 +72,13 @@ async function ensureDatabaseSeeded(database: Db) {
           ],
           imageUrl: ""
         },
+        sectionOrder: data.sectionOrder || [
+          "hero",
+          "about",
+          "whyChooseUs",
+          "services",
+          "contact"
+        ],
         updatedAt: new Date().toISOString()
       };
       await settingsColl.insertOne(settingsDoc as any);

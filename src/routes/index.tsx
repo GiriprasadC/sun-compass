@@ -27,51 +27,64 @@ function Index() {
   const services = dbData.services || [];
   const [activeService, setActiveService] = useState<Service | null>(null);
 
+  const sectionOrder = dbData.sectionOrder || ["hero", "about", "whyChooseUs", "services", "contact"];
+
   return (
     <>
-      <Hero />
-      <About />
-      <WhyChooseUs />
-
-      {/* Services Section on Homepage */}
-      <section id="services" className="py-20 md:py-28 bg-slate-50/50 border-t border-b border-border/50">
-        <Container>
-          <SectionHeading
-            eyebrow="Our Services"
-            title="Programmes designed for scholars and educators"
-            description="Four core service areas — each led with 35+ years of academic rigour and mentorship."
-            align="center"
-          />
-          <motion.div
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.15 }}
-            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}
-            className="grid gap-6 md:grid-cols-2 xl:grid-cols-4 mt-12"
-          >
-            {services.map((s) => (
-              <ServiceCard key={s.id} service={s} onOpen={() => setActiveService(s)} />
-            ))}
-          </motion.div>
-        </Container>
-      </section>
-
-      {/* Contact Section on Homepage */}
-      <section id="contact" className="py-20 md:py-28">
-        <Container>
-          <SectionHeading
-            eyebrow="Contact Us"
-            title="We'd love to hear from you"
-            description="Reach out for programme enquiries, doctoral guidance, or institutional partnerships."
-            align="center"
-          />
-          <div className="grid gap-6 lg:grid-cols-3 mt-12">
-            <ContactInfo />
-            <EnquiryForm />
-            <MapEmbed />
-          </div>
-        </Container>
-      </section>
+      {sectionOrder.map((sectionId) => {
+        switch (sectionId) {
+          case "hero":
+            return <Hero key="hero" />;
+          case "about":
+            return <About key="about" />;
+          case "whyChooseUs":
+            return <WhyChooseUs key="whyChooseUs" />;
+          case "services":
+            return (
+              <section key="services" id="services" className="py-20 md:py-28 bg-slate-50/50 border-t border-b border-border/50">
+                <Container>
+                  <SectionHeading
+                    eyebrow="Our Services"
+                    title="Programmes designed for scholars and educators"
+                    description="Four core service areas — each led with 35+ years of academic rigour and mentorship."
+                    align="center"
+                  />
+                  <motion.div
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true, amount: 0.15 }}
+                    variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}
+                    className="grid gap-6 md:grid-cols-2 xl:grid-cols-4 mt-12"
+                  >
+                    {services.map((s) => (
+                      <ServiceCard key={s.id} service={s} onOpen={() => setActiveService(s)} />
+                    ))}
+                  </motion.div>
+                </Container>
+              </section>
+            );
+          case "contact":
+            return (
+              <section key="contact" id="contact" className="py-20 md:py-28">
+                <Container>
+                  <SectionHeading
+                    eyebrow="Contact Us"
+                    title="We'd love to hear from you"
+                    description="Reach out for programme enquiries, doctoral guidance, or institutional partnerships."
+                    align="center"
+                  />
+                  <div className="grid gap-6 lg:grid-cols-3 mt-12">
+                    <ContactInfo />
+                    <EnquiryForm />
+                    <MapEmbed />
+                  </div>
+                </Container>
+              </section>
+            );
+          default:
+            return null;
+        }
+      })}
 
       <ServiceModal
         service={activeService}

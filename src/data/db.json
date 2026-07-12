@@ -161,5 +161,12 @@
     ],
     "imageUrl": ""
   },
+  "sectionOrder": [
+    "hero",
+    "about",
+    "whyChooseUs",
+    "services",
+    "contact"
+  ],
   "enquiries": []
 }

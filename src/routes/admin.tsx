@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getDbData, updateStats, updateServices, updateContactInfo, updateSocialLinks, deleteEnquiry, updateHero, updateAbout, uploadImage, type DbData } from "@/lib/db";
+import { getDbData, updateStats, updateServices, updateContactInfo, updateSocialLinks, deleteEnquiry, updateHero, updateAbout, updateSectionOrder, type DbData } from "@/lib/db";
 import { Container } from "@/components/ui/Container";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -28,7 +28,10 @@ import {
   ChevronRight,
   X,
   Info,
-  Upload
+  Upload,
+  Sliders,
+  ArrowUp,
+  ArrowDown
 } from "lucide-react";
 
 function isValidUrl(url?: string): boolean {
@@ -101,7 +104,7 @@ function AdminPage() {
   const queryClient = useQueryClient();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passcode, setPasscode] = useState("");
-  const [activeTab, setActiveTab] = useState<"dashboard" | "enquiries" | "services" | "stats" | "contact" | "heroAbout">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "enquiries" | "services" | "stats" | "contact" | "heroAbout" | "layout">("dashboard");
 
   // Fetch db data
   const { data: dbData, isLoading } = useQuery({
@@ -198,6 +201,15 @@ function AdminPage() {
     onError: () => toast.error("Failed to update About section"),
   });
 
+  const layoutMutation = useMutation({
+    mutationFn: (order: string[]) => updateSectionOrder({ data: order }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["dbData"] });
+      toast.success("Page layout order updated successfully!");
+    },
+    onError: () => toast.error("Failed to update layout order"),
+  });
+
   // Services State management (local edit states)
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
   const [localServices, setLocalServices] = useState<any[]>([]);
@@ -211,6 +223,7 @@ function AdminPage() {
   const [aboutImageUrl, setAboutImageUrl] = useState("");
   const [isHeroUploading, setIsHeroUploading] = useState(false);
   const [isAboutUploading, setIsAboutUploading] = useState(false);
+  const [localSectionOrder, setLocalSectionOrder] = useState<string[]>([]);
 
   // Sync server data to local edit forms
   useEffect(() => {
@@ -225,6 +238,9 @@ function AdminPage() {
       setAboutAffiliations(dbData.about.affiliations || []);
       setAboutBulletPoints(dbData.about.bulletPoints || []);
       setAboutImageUrl(dbData.about.imageUrl || "");
+    }
+    if (dbData?.sectionOrder) {
+      setLocalSectionOrder(dbData.sectionOrder);
     }
   }, [dbData]);
 
@@ -314,6 +330,7 @@ function AdminPage() {
             { id: "stats", label: "Stats (Why Choose Us)", Icon: Award },
             { id: "contact", label: "Contact & Socials", Icon: Share2 },
             { id: "heroAbout", label: "Hero & About", Icon: Info },
+            { id: "layout", label: "Page Layout", Icon: Sliders },
           ].map(({ id, label, Icon }) => (
             <button
               key={id}
@@ -1413,6 +1430,104 @@ function AdminPage() {
                         Save About Section
                       </button>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* PAGE LAYOUT TAB */}
+              {activeTab === "layout" && (
+                <div className="max-w-2xl mx-auto rounded-3xl border border-border bg-white p-6 shadow-soft animate-in fade-in-50 duration-200">
+                  <h3 className="font-display text-lg font-bold text-foreground">Page Layout Order</h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Shift sections up and down to dynamically rearrange how they appear on the homepage.
+                  </p>
+                  
+                  <div className="mt-6 space-y-3">
+                    {localSectionOrder.map((sectionId, index) => {
+                      const sectionNames: Record<string, { title: string; desc: string }> = {
+                        hero: { title: "Hero Section", desc: "Top header with badge, headline, subtext, statistics card, and visual cover." },
+                        about: { title: "Director's Biography", desc: "About section presenting qualifications, affiliations, bio, and achievements." },
+                        whyChooseUs: { title: "Why Choose Us (Stats)", desc: "Drawn counters grid showing years of experience, scholars guided, and student training numbers." },
+                        services: { title: "Manage Services", desc: "Grid cards showcasing our core courses (Ph.D., training, psychology optional, IAS)." },
+                        contact: { title: "Contact Us & Map", desc: "Location embedding panel, social links, phone/mail fields, and email enquiries." },
+                      };
+                      
+                      const info = sectionNames[sectionId] || { title: sectionId, desc: "" };
+                      
+                      return (
+                        <div
+                          key={sectionId}
+                          className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-slate-50/50 p-4 transition-all hover:bg-slate-50"
+                        >
+                          <div>
+                            <h4 className="text-sm font-semibold text-foreground">{info.title}</h4>
+                            <p className="text-[10px] text-muted-foreground mt-0.5 max-w-md leading-relaxed">{info.desc}</p>
+                          </div>
+                          
+                          <div className="flex gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              disabled={index === 0}
+                              onClick={() => {
+                                if (index === 0) return;
+                                const newOrder = [...localSectionOrder];
+                                [newOrder[index], newOrder[index - 1]] = [newOrder[index - 1], newOrder[index]];
+                                setLocalSectionOrder(newOrder);
+                              }}
+                              className="rounded-xl border border-border bg-white p-2 text-muted-foreground hover:text-primary hover:border-primary disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+                              title="Move Up"
+                            >
+                              <ArrowUp className="h-4 w-4" />
+                            </button>
+                            
+                            <button
+                              type="button"
+                              disabled={index === localSectionOrder.length - 1}
+                              onClick={() => {
+                                if (index === localSectionOrder.length - 1) return;
+                                const newOrder = [...localSectionOrder];
+                                [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
+                                setLocalSectionOrder(newOrder);
+                              }}
+                              className="rounded-xl border border-border bg-white p-2 text-muted-foreground hover:text-primary hover:border-primary disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+                              title="Move Down"
+                            >
+                              <ArrowDown className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  
+                  <div className="mt-8 flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        layoutMutation.mutate(localSectionOrder);
+                      }}
+                      disabled={layoutMutation.isPending}
+                      className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-semibold text-primary-foreground hover:bg-primary-hover shadow-soft transition-all cursor-pointer"
+                    >
+                      {layoutMutation.isPending ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Save className="h-3.5 w-3.5" />
+                      )}
+                      Save Layout Order
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (dbData?.sectionOrder) {
+                          setLocalSectionOrder(dbData.sectionOrder);
+                        }
+                      }}
+                      className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-5 py-2.5 text-xs font-semibold text-muted-foreground hover:bg-slate-50 transition-all cursor-pointer"
+                    >
+                      Reset Changes
+                    </button>
                   </div>
                 </div>
               )}

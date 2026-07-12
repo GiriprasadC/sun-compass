@@ -50,6 +50,7 @@ export interface DbData {
     bulletPoints: string[];
     imageUrl?: string;
   };
+  sectionOrder: string[];
   enquiries: Array<{
     id: string;
     name: string;
@@ -200,6 +201,7 @@ const DEFAULT_DB_DATA: DbData = {
     ],
     imageUrl: ""
   },
+  sectionOrder: ["hero", "about", "whyChooseUs", "services", "contact"],
   enquiries: []
 };
 
@@ -255,6 +257,7 @@ export const getDbData = createServerFn({ method: "GET" })
       const socialLinks = settingsDoc?.socialLinks || DEFAULT_DB_DATA.socialLinks;
       const hero = settingsDoc?.hero || DEFAULT_DB_DATA.hero;
       const about = settingsDoc?.about || DEFAULT_DB_DATA.about;
+      const sectionOrder = settingsDoc?.sectionOrder || DEFAULT_DB_DATA.sectionOrder;
 
       return {
         stats,
@@ -263,6 +266,7 @@ export const getDbData = createServerFn({ method: "GET" })
         socialLinks,
         hero,
         about,
+        sectionOrder,
         enquiries
       } as DbData;
     } catch (err) {
@@ -386,6 +390,26 @@ export const updateAbout = createServerFn({ method: "POST" })
       console.warn("MongoDB update about failed, falling back to local JSON db:", (err as Error).message || err);
       const data = await readFallbackJson();
       data.about = about;
+      await writeFallbackJson(data);
+    }
+    return { success: true };
+  });
+
+export const updateSectionOrder = createServerFn({ method: "POST" })
+  .validator((sectionOrder: string[]) => sectionOrder)
+  .handler(async ({ data: sectionOrder }) => {
+    try {
+      const { connectToDatabase } = await import("./mongodb.server");
+      const { db } = await connectToDatabase();
+
+      await db.collection("settings").updateOne(
+        { _id: "global_settings" as any },
+        { $set: { sectionOrder, updatedAt: new Date().toISOString() } }
+      );
+    } catch (err) {
+      console.warn("MongoDB update sectionOrder failed, falling back to local JSON db:", (err as Error).message || err);
+      const data = await readFallbackJson();
+      data.sectionOrder = sectionOrder;
       await writeFallbackJson(data);
     }
     return { success: true };
