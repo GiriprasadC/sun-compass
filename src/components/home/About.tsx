@@ -69,7 +69,10 @@ export function About() {
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <SectionHeading eyebrow="About Us" title={`${about.name}, ${about.credentials.join(", ")}`} />
+          <SectionHeading eyebrow="About Us" title={about.name} />
+          <p className="mt-1 text-base font-semibold text-foreground/70">
+            {about.credentials.join(", ")}
+          </p>
 
           <p className="mt-2 text-sm font-medium uppercase tracking-wider text-primary font-display">
             {about.designation}
