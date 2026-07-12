@@ -70,20 +70,14 @@ export function About() {
           transition={{ duration: 0.5, delay: 0.1 }}
         >
           <SectionHeading eyebrow="About Us" title={about.name} />
-          <p className="mt-3 text-sm font-medium uppercase tracking-wider text-primary font-display">
-            {about.designation}
+
+          <p className="mt-3 text-sm font-semibold tracking-wide text-foreground/80">
+            {about.credentials.join("  •  ")}
           </p>
 
-          <div className="mt-5 flex flex-wrap gap-2">
-            {about.credentials.map((c) => (
-              <span
-                key={c}
-                className="rounded-full border border-primary/20 bg-primary-tint px-3 py-1 text-xs font-semibold text-primary"
-              >
-                {c}
-              </span>
-            ))}
-          </div>
+          <p className="mt-2 text-sm font-medium uppercase tracking-wider text-primary font-display">
+            {about.designation}
+          </p>
 
           <p className="mt-6 leading-relaxed text-muted-foreground">
             {about.bio}
