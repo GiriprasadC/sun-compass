@@ -515,3 +515,27 @@ export const uploadImage = createServerFn({ method: "POST" })
       return { success: false, error: (err as Error).message || String(err) };
     }
   });
+
+export const getDbStatus = createServerFn({ method: "GET" })
+  .handler(async () => {
+    try {
+      const { connectToDatabase } = await import("./mongodb.server");
+      const { client } = await connectToDatabase();
+      const isConnected = !!client;
+      const uriToUse = process.env.MONGODB_URI || "mongodb://localhost:27017/sun-compass";
+      const safeUri = uriToUse.includes("@") ? uriToUse.split("@")[1] : uriToUse;
+      return {
+        type: "mongodb",
+        connected: isConnected,
+        uri: safeUri,
+        message: "Connected to external MongoDB database. Your data is persisted permanently."
+      };
+    } catch (err) {
+      return {
+        type: "json",
+        connected: false,
+        uri: "local db.json",
+        message: `Running on local JSON fallback database: ${(err as Error).message || err}. Note: edits will reset when a new version is pushed because local serverless storage is temporary. Please configure MONGODB_URI in your environment variables.`
+      };
+    }
+  });

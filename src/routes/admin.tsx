@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getDbData, updateStats, updateServices, updateContactInfo, updateSocialLinks, deleteEnquiry, updateHero, updateAbout, updateSectionOrder, updateConsultationWidget, type DbData } from "@/lib/db";
+import { getDbData, updateStats, updateServices, updateContactInfo, updateSocialLinks, deleteEnquiry, updateHero, updateAbout, updateSectionOrder, updateConsultationWidget, getDbStatus, type DbData } from "@/lib/db";
 import { Container } from "@/components/ui/Container";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -110,6 +110,12 @@ function AdminPage() {
   const { data: dbData, isLoading } = useQuery({
     queryKey: ["dbData"],
     queryFn: () => getDbData(),
+  });
+
+  const { data: dbStatus } = useQuery({
+    queryKey: ["dbStatus"],
+    queryFn: () => getDbStatus(),
+    refetchInterval: 15000,
   });
 
   // Check auth on load
@@ -315,19 +321,43 @@ function AdminPage() {
   return (
     <div className="min-h-screen bg-slate-50/50 pt-24 pb-16">
       <Container>
-        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div>
             <h1 className="font-display text-3xl font-bold text-foreground">Admin Console</h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mt-1">
               Configure services, stats, contact listings, and check submitted enquiries.
             </p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="self-start rounded-full border border-border bg-white px-4 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:bg-slate-50 hover:text-foreground"
-          >
-            Logout
-          </button>
+
+          <div className="flex flex-wrap items-center gap-3 self-start md:self-auto">
+            {/* Database Connection Status Indicator */}
+            {dbStatus && (
+              <div className={`flex items-start gap-3 rounded-2xl border px-4 py-3 shadow-soft max-w-sm ${
+                dbStatus.type === "mongodb" && dbStatus.connected
+                  ? "border-emerald-100 bg-emerald-50/50 text-emerald-950"
+                  : "border-amber-200 bg-amber-50/70 text-amber-950"
+              }`}>
+                <div className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
+                  dbStatus.type === "mongodb" && dbStatus.connected ? "bg-emerald-500 animate-pulse" : "bg-amber-500 animate-pulse"
+                }`} />
+                <div className="flex flex-col text-left">
+                  <span className="text-xs font-bold uppercase tracking-wider">
+                    Database: {dbStatus.type === "mongodb" && dbStatus.connected ? "MongoDB Active" : "Local fallback"}
+                  </span>
+                  <span className="text-[11px] leading-snug mt-0.5 opacity-90">
+                    {dbStatus.message}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={handleLogout}
+              className="rounded-full border border-border bg-white px-4 py-2.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-slate-50 hover:text-foreground cursor-pointer"
+            >
+              Logout
+            </button>
+          </div>
         </div>
 
         {/* Tab Selection */}
