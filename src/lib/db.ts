@@ -266,12 +266,16 @@ export const getDbData = createServerFn({ method: "GET" })
 
       const stats = (settingsDoc?.stats && settingsDoc.stats.length > 0) ? settingsDoc.stats : DEFAULT_DB_DATA.stats;
       const services = (settingsDoc?.services && settingsDoc.services.length > 0) ? settingsDoc.services : DEFAULT_DB_DATA.services;
-      const contactInfo = settingsDoc?.contactInfo || DEFAULT_DB_DATA.contactInfo;
+      const contactInfo = { ...(settingsDoc?.contactInfo || DEFAULT_DB_DATA.contactInfo) };
       const socialLinks = settingsDoc?.socialLinks || DEFAULT_DB_DATA.socialLinks;
       const hero = settingsDoc?.hero || DEFAULT_DB_DATA.hero;
       const about = settingsDoc?.about || DEFAULT_DB_DATA.about;
       const sectionOrder = settingsDoc?.sectionOrder || DEFAULT_DB_DATA.sectionOrder;
       const consultationWidget = settingsDoc?.consultationWidget || DEFAULT_DB_DATA.consultationWidget;
+
+      if (contactInfo.directorSub) {
+        contactInfo.directorSub = contactInfo.directorSub.replace(/^Director,\s*/, "");
+      }
 
       return {
         stats,
@@ -286,7 +290,11 @@ export const getDbData = createServerFn({ method: "GET" })
       } as DbData;
     } catch (err) {
       console.warn("MongoDB connection failed, falling back to local JSON file db:", (err as Error).message || err);
-      return await readFallbackJson();
+      const data = await readFallbackJson();
+      if (data.contactInfo && data.contactInfo.directorSub) {
+        data.contactInfo.directorSub = data.contactInfo.directorSub.replace(/^Director,\s*/, "");
+      }
+      return data;
     }
   });
 

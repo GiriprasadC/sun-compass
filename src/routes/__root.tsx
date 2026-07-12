@@ -100,6 +100,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Empowering research, education and professional development — 35+ years of academic mentorship in Chennai.",
       },
+      { name: "keywords", content: "PhD assistance Chennai, PhD thesis help Chennai, teachers training programme, faculty development, psychological assessment of students, IQ assessment, career counseling Chennai, IAS coaching psychology optional, Prof Dr R Rajendran, SUN Academic Research, educational consultant Chennai, Udyam registered academic center" },
+      { name: "robots", content: "index, follow" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -122,10 +124,45 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "EducationalOrganization",
+    "name": "SUN Academic Research & Training",
+    "alternateName": "SUN Academic",
+    "url": "https://www.sunacademicresearch.org",
+    "logo": "https://www.sunacademicresearch.org/favicon.svg",
+    "description": "SUN Academic Research & Training in Chennai offers premium Ph.D. assistance, teachers training, psychological student assessments, and civil services coaching led by Prof. Dr. R. Rajendran.",
+    "founder": {
+      "@type": "Person",
+      "name": "Prof. Dr. R. Rajendran",
+      "jobTitle": "Director & Head",
+      "alumniOf": "Annamalai University"
+    },
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "No.104/1, A.K. Swamy Nagar, 7th Street, Kilpauk",
+      "addressLocality": "Chennai",
+      "addressRegion": "Tamil Nadu",
+      "postalCode": "600010",
+      "addressCountry": "IN"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+91-98403-41412",
+      "contactType": "customer service",
+      "availableLanguage": ["English", "Tamil"]
+    },
+    "leiCode": "UDYAM-TN-02-0161010/2022"
+  };
+
   return (
     <html lang="en">
       <head>
         <HeadContent />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </head>
       <body>
         {children}
