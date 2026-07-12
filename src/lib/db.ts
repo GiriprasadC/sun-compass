@@ -528,14 +528,19 @@ export const getDbStatus = createServerFn({ method: "GET" })
         type: "mongodb",
         connected: isConnected,
         uri: safeUri,
+        isLocal: false,
         message: "Connected to external MongoDB database. Your data is persisted permanently."
       };
     } catch (err) {
+      const isDev = process.env.NODE_ENV === "development";
       return {
         type: "json",
         connected: false,
         uri: "local db.json",
-        message: `Running on local JSON fallback database: ${(err as Error).message || err}. Note: edits will reset when a new version is pushed because local serverless storage is temporary. Please configure MONGODB_URI in your environment variables.`
+        isLocal: isDev,
+        message: isDev
+          ? "Running on local JSON database. All changes you make here are saved permanently in src/data/db.json."
+          : `Running on local JSON fallback database: ${(err as Error).message || err}. Note: edits will reset when a new version is pushed because local serverless storage is temporary. Please configure MONGODB_URI in your environment variables.`
       };
     }
   });

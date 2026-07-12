@@ -335,14 +335,26 @@ function AdminPage() {
               <div className={`flex items-start gap-3 rounded-2xl border px-4 py-3 shadow-soft max-w-sm ${
                 dbStatus.type === "mongodb" && dbStatus.connected
                   ? "border-emerald-100 bg-emerald-50/50 text-emerald-950"
-                  : "border-amber-200 bg-amber-50/70 text-amber-950"
+                  : dbStatus.isLocal
+                    ? "border-blue-100 bg-blue-50/50 text-blue-950"
+                    : "border-amber-200 bg-amber-50/70 text-amber-950"
               }`}>
                 <div className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
-                  dbStatus.type === "mongodb" && dbStatus.connected ? "bg-emerald-500 animate-pulse" : "bg-amber-500 animate-pulse"
+                  dbStatus.type === "mongodb" && dbStatus.connected
+                    ? "bg-emerald-500 animate-pulse"
+                    : dbStatus.isLocal
+                      ? "bg-blue-500"
+                      : "bg-amber-500 animate-pulse"
                 }`} />
                 <div className="flex flex-col text-left">
                   <span className="text-xs font-bold uppercase tracking-wider">
-                    Database: {dbStatus.type === "mongodb" && dbStatus.connected ? "MongoDB Active" : "Local fallback"}
+                    Database: {
+                      dbStatus.type === "mongodb" && dbStatus.connected
+                        ? "MongoDB Active"
+                        : dbStatus.isLocal
+                          ? "Local JSON File"
+                          : "Local fallback"
+                    }
                   </span>
                   <span className="text-[11px] leading-snug mt-0.5 opacity-90">
                     {dbStatus.message}
