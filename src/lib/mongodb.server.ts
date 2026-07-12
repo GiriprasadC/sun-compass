@@ -1,6 +1,6 @@
 import { MongoClient, Db } from "mongodb";
 
-const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/sun-compass";
+const uri = process.env.sunacademic2026_MONGODB_URI || process.env.MONGODB_URI || "mongodb://localhost:27017/sun-compass";
 
 let cachedClient: MongoClient | null = null;
 let cachedDb: Db | null = null;

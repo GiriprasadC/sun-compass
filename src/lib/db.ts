@@ -522,7 +522,7 @@ export const getDbStatus = createServerFn({ method: "GET" })
       const { connectToDatabase } = await import("./mongodb.server");
       const { client } = await connectToDatabase();
       const isConnected = !!client;
-      const uriToUse = process.env.MONGODB_URI || "mongodb://localhost:27017/sun-compass";
+      const uriToUse = process.env.sunacademic2026_MONGODB_URI || process.env.MONGODB_URI || "mongodb://localhost:27017/sun-compass";
       const safeUri = uriToUse.includes("@") ? uriToUse.split("@")[1] : uriToUse;
       return {
         type: "mongodb",
