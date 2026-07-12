@@ -29,12 +29,13 @@ async function ensureDatabaseSeeded(database: Db) {
 
         if (
           currentSettings.about?.affiliations &&
-          currentSettings.about.affiliations.includes("Tamil Nadu Government")
+          (currentSettings.about.affiliations.includes("Tamil Nadu Government") ||
+           currentSettings.about.affiliations.includes("NITTTR, Ministry of Education, Govt. of India"))
         ) {
           updateDoc["about.affiliations"] = [
             "Annamalai University",
             "Madras University",
-            "NITTTR, Ministry of Education, Govt. of India"
+            "NITTTR, Ministry of Education, Government of India"
           ];
           updateDoc["about.bulletPoints"] = [
             "35+ years of teaching, research and academic experience.",
@@ -44,20 +45,19 @@ async function ensureDatabaseSeeded(database: Db) {
         }
 
         if (currentSettings.stats) {
-          let statsChanged = false;
-          const newStats = currentSettings.stats.map((stat: any) => {
-            if (stat.label === "Research Scholars Guided") {
-              statsChanged = true;
-              return { label: "Ph.D. Awarded", value: 10, suffix: "+", icon: "GraduationCap" };
-            }
-            if (stat.label === "Ph.D Candidates") {
-              statsChanged = true;
-              return { label: "Teachers Trained", value: 90000, suffix: "+", icon: "Users" };
-            }
-            return stat;
-          });
-          if (statsChanged) {
-            updateDoc["stats"] = newStats;
+          const hasOldLabels = currentSettings.stats.some((s: any) => 
+            s.label === "Research Scholars Guided" || 
+            s.label === "Ph.D Candidates" || 
+            s.label === "Teachers Trained" ||
+            (s.label === "Teachers are Trained" && s.suffix === "+")
+          );
+          if (hasOldLabels) {
+            updateDoc["stats"] = [
+              { label: "Years Experience", value: 35, suffix: "+", icon: "Award" },
+              { label: "Ph.D. Awarded", value: 10, suffix: "+", icon: "GraduationCap" },
+              { label: "Teachers are Trained", value: 90000, suffix: "", icon: "Users" },
+              { label: "Students Trained", value: 1000, suffix: "+", icon: "BookOpen" }
+            ];
             needsUpdate = true;
           }
         }
@@ -83,11 +83,13 @@ async function ensureDatabaseSeeded(database: Db) {
                 methodology: []
               };
             }
-            if (service.id === "psychological-assessment" && service.title === "Psychological Assessment of Students") {
+            if (service.id === "psychological-assessment" && 
+                (service.title === "Psychological Assessment of Students" || 
+                 service.title === "Counselling Psychologist & Assessment of Students")) {
               servicesChanged = true;
               return {
                 ...service,
-                title: "Counselling Psychologist & Assessment of Students",
+                title: "Counselling & Assessment of Students",
                 methodology: []
               };
             }
@@ -104,6 +106,16 @@ async function ensureDatabaseSeeded(database: Db) {
             updateDoc["services"] = newServices;
             needsUpdate = true;
           }
+        }
+
+        if (!currentSettings.consultationWidget) {
+          updateDoc["consultationWidget"] = {
+            enabled: true,
+            labelSmall: "Click Here For",
+            labelLarge: "Free Consultation",
+            phoneOverride: ""
+          };
+          needsUpdate = true;
         }
 
         if (needsUpdate) {
@@ -141,8 +153,8 @@ async function ensureDatabaseSeeded(database: Db) {
         _id: "global_settings",
         stats: data.stats || [
           { label: "Years Experience", value: 35, suffix: "+", icon: "Award" },
-          { label: "Research Scholars Guided", value: 85, suffix: "+", icon: "Users" },
-          { label: "Ph.D Candidates", value: 10, suffix: "+", icon: "GraduationCap" },
+          { label: "Ph.D. Awarded", value: 10, suffix: "+", icon: "GraduationCap" },
+          { label: "Teachers are Trained", value: 90000, suffix: "", icon: "Users" },
           { label: "Students Trained", value: 1000, suffix: "+", icon: "BookOpen" }
         ],
         services: data.services || [],
@@ -170,13 +182,17 @@ async function ensureDatabaseSeeded(database: Db) {
         },
         about: data.about || {
           name: "Prof. Dr. R. Rajendran",
-          designation: "Director, SUN Academic Research & Training, Chennai",
+          designation: "Director",
           bio: "A distinguished academician whose career took shape at Annamalai University, rising to Professor & Head of the Centre for Educational Management and Applied Science. Over three and a half decades, he has shaped generations of teachers, scholars and civil service aspirants across South India.",
           credentials: ["M.A.", "M.Ed.", "M.B.A.", "Ph.D.", "FBMS"],
-          affiliations: ["NITTTR", "Ministry of Education", "Tamil Nadu Government"],
+          affiliations: [
+            "Annamalai University",
+            "Madras University",
+            "NITTTR, Ministry of Education, Government of India"
+          ],
           bulletPoints: [
             "35+ years of teaching, research and academic experience.",
-            "Guided 10 Candidates, 85 Research Scholars and numerous Ph.D. researchers."
+            "Guided 10+ Ph.D. Candidates and trained over 90,000 teachers."
           ],
           imageUrl: ""
         },
@@ -187,6 +203,12 @@ async function ensureDatabaseSeeded(database: Db) {
           "services",
           "contact"
         ],
+        consultationWidget: data.consultationWidget || {
+          enabled: true,
+          labelSmall: "Click Here For",
+          labelLarge: "Free Consultation",
+          phoneOverride: ""
+        },
         updatedAt: new Date().toISOString()
       };
       await settingsColl.insertOne(settingsDoc as any);

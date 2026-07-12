@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getDbData, updateStats, updateServices, updateContactInfo, updateSocialLinks, deleteEnquiry, updateHero, updateAbout, updateSectionOrder, type DbData } from "@/lib/db";
+import { getDbData, updateStats, updateServices, updateContactInfo, updateSocialLinks, deleteEnquiry, updateHero, updateAbout, updateSectionOrder, updateConsultationWidget, type DbData } from "@/lib/db";
 import { Container } from "@/components/ui/Container";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -208,6 +208,15 @@ function AdminPage() {
       toast.success("Page layout order updated successfully!");
     },
     onError: () => toast.error("Failed to update layout order"),
+  });
+
+  const widgetMutation = useMutation({
+    mutationFn: (widget: DbData["consultationWidget"]) => updateConsultationWidget({ data: widget }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["dbData"] });
+      toast.success("Consultation widget updated successfully!");
+    },
+    onError: () => toast.error("Failed to update consultation widget"),
   });
 
   // Services State management (local edit states)
@@ -923,7 +932,8 @@ function AdminPage() {
 
               {/* CONTACT & SOCIALS TAB */}
               {activeTab === "contact" && (
-                <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-6">
+                  <div className="grid gap-6 md:grid-cols-2">
                   {/* Contact form */}
                   <div className="rounded-3xl border border-border bg-white p-6 shadow-soft">
                     <h3 className="font-display text-lg font-bold text-foreground">
@@ -1119,7 +1129,7 @@ function AdminPage() {
                       <button
                         type="submit"
                         disabled={socialMutation.isPending}
-                        className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-semibold text-primary-foreground hover:bg-primary-hover shadow-soft"
+                        className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-semibold text-primary-foreground hover:bg-primary-hover shadow-soft cursor-pointer transition-all"
                       >
                         {socialMutation.isPending ? (
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -1131,7 +1141,102 @@ function AdminPage() {
                     </form>
                   </div>
                 </div>
-              )}
+
+                {/* Consultation Widget Editor Form */}
+                <div className="mt-6 rounded-3xl border border-border bg-white p-6 shadow-soft max-w-2xl">
+                  <h3 className="font-display text-lg font-bold text-foreground">
+                    Floating Consultation Widget
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Configure the floating bottom-right bubble that links visitors to direct call consultations.
+                  </p>
+
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const formData = new FormData(e.currentTarget);
+                      const data = {
+                        enabled: formData.get("enabled") === "on",
+                        labelSmall: formData.get("labelSmall") as string,
+                        labelLarge: formData.get("labelLarge") as string,
+                        phoneOverride: formData.get("phoneOverride") as string || "",
+                      };
+                      widgetMutation.mutate(data);
+                    }}
+                    className="mt-6 space-y-4"
+                  >
+                    <div className="flex items-center gap-3 rounded-xl border border-border bg-slate-50/50 p-3.5">
+                      <input
+                        type="checkbox"
+                        name="enabled"
+                        id="widget-enabled"
+                        defaultChecked={dbData?.consultationWidget?.enabled ?? true}
+                        className="h-4 w-4 rounded border-border text-primary focus:ring-primary cursor-pointer"
+                      />
+                      <label htmlFor="widget-enabled" className="text-sm font-semibold text-foreground cursor-pointer select-none">
+                        Enable Floating Widget globally
+                      </label>
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          Top Sub-title Text
+                        </label>
+                        <input
+                          type="text"
+                          name="labelSmall"
+                          defaultValue={dbData?.consultationWidget?.labelSmall ?? "Click Here For"}
+                          placeholder="e.g. Click Here For"
+                          className="mt-1.5 w-full rounded-xl border border-border px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          Main CTA Text
+                        </label>
+                        <input
+                          type="text"
+                          name="labelLarge"
+                          defaultValue={dbData?.consultationWidget?.labelLarge ?? "Free Consultation"}
+                          placeholder="e.g. Free Consultation"
+                          className="mt-1.5 w-full rounded-xl border border-border px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Phone Number Override (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        name="phoneOverride"
+                        defaultValue={dbData?.consultationWidget?.phoneOverride || ""}
+                        placeholder="Leave empty to use the office phone number above"
+                        className="mt-1.5 w-full rounded-xl border border-border px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={widgetMutation.isPending}
+                      className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-semibold text-primary-foreground hover:bg-primary-hover shadow-soft cursor-pointer transition-all"
+                    >
+                      {widgetMutation.isPending ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Save className="h-3.5 w-3.5" />
+                      )}
+                      Save Widget Settings
+                    </button>
+                  </form>
+                </div>
+              </div>
+            )}
 
               {/* HERO & ABOUT TAB */}
               {activeTab === "heroAbout" && (

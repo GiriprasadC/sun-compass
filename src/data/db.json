@@ -163,5 +163,11 @@
     "services",
     "contact"
   ],
+  "consultationWidget": {
+    "enabled": true,
+    "labelSmall": "Click Here For",
+    "labelLarge": "Free Consultation",
+    "phoneOverride": ""
+  },
   "enquiries": []
 }

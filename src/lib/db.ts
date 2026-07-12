@@ -51,6 +51,12 @@ export interface DbData {
     imageUrl?: string;
   };
   sectionOrder: string[];
+  consultationWidget: {
+    enabled: boolean;
+    labelSmall: string;
+    labelLarge: string;
+    phoneOverride?: string;
+  };
   enquiries: Array<{
     id: string;
     name: string;
@@ -202,6 +208,12 @@ const DEFAULT_DB_DATA: DbData = {
     imageUrl: ""
   },
   sectionOrder: ["hero", "about", "whyChooseUs", "services", "contact"],
+  consultationWidget: {
+    enabled: true,
+    labelSmall: "Click Here For",
+    labelLarge: "Free Consultation",
+    phoneOverride: ""
+  },
   enquiries: []
 };
 
@@ -258,6 +270,7 @@ export const getDbData = createServerFn({ method: "GET" })
       const hero = settingsDoc?.hero || DEFAULT_DB_DATA.hero;
       const about = settingsDoc?.about || DEFAULT_DB_DATA.about;
       const sectionOrder = settingsDoc?.sectionOrder || DEFAULT_DB_DATA.sectionOrder;
+      const consultationWidget = settingsDoc?.consultationWidget || DEFAULT_DB_DATA.consultationWidget;
 
       return {
         stats,
@@ -267,6 +280,7 @@ export const getDbData = createServerFn({ method: "GET" })
         hero,
         about,
         sectionOrder,
+        consultationWidget,
         enquiries
       } as DbData;
     } catch (err) {
@@ -410,6 +424,26 @@ export const updateSectionOrder = createServerFn({ method: "POST" })
       console.warn("MongoDB update sectionOrder failed, falling back to local JSON db:", (err as Error).message || err);
       const data = await readFallbackJson();
       data.sectionOrder = sectionOrder;
+      await writeFallbackJson(data);
+    }
+    return { success: true };
+  });
+
+export const updateConsultationWidget = createServerFn({ method: "POST" })
+  .validator((widget: DbData["consultationWidget"]) => widget)
+  .handler(async ({ data: widget }) => {
+    try {
+      const { connectToDatabase } = await import("./mongodb.server");
+      const { db } = await connectToDatabase();
+
+      await db.collection("settings").updateOne(
+        { _id: "global_settings" as any },
+        { $set: { consultationWidget: widget, updatedAt: new Date().toISOString() } }
+      );
+    } catch (err) {
+      console.warn("MongoDB update consultationWidget failed, falling back to local JSON db:", (err as Error).message || err);
+      const data = await readFallbackJson();
+      data.consultationWidget = widget;
       await writeFallbackJson(data);
     }
     return { success: true };
