@@ -8,6 +8,7 @@ export type Service = {
   title: string;
   summary: string;
   items: string[];
+  subjects?: string[];
   methodology?: string[];
   duration?: string;
   venue?: string;

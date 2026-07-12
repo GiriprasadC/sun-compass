@@ -63,53 +63,104 @@ async function ensureDatabaseSeeded(database: Db) {
         }
 
         if (currentSettings.services) {
-          let servicesChanged = false;
-          const newServices = currentSettings.services.map((service: any) => {
-            let updated = { ...service };
-            let changed = false;
-
-            if (service.id === "teachers-training" && service.title === "Teachers Training Programme") {
-              updated.title = "Workshop on Faculty Development Programme for College/University Teachers and Principals of Schools";
-              changed = true;
-            }
-            if (service.id === "phd-assistance" && (service.title === "Ph.D. Assistance" || service.items.includes("Research Topic Selection"))) {
-              updated.title = "Ph.D Assistance";
-              updated.items = [
-                "Psychology",
-                "Commerce",
-                "Management",
-                "Education",
-                "Sociology",
-                "Physical Education",
-                "Design & Fashion Technology",
-                "Hotel Management",
-                "Health & Hospital Management"
-              ];
-              updated.methodology = [];
-              changed = true;
-            }
-            if (service.id === "psychological-assessment" && 
-                (service.title === "Psychological Assessment of Students" || 
-                 service.title === "Counselling Psychologist & Assessment of Students" ||
-                 service.title === "Counselling Psychologist Assessment of Students")) {
-              updated.title = "Counselling & Assessment of Students";
-              updated.methodology = [];
-              changed = true;
-            }
-            if (service.id === "ias-coaching" && (service.title === "IAS Coaching" || (service.methodology && service.methodology.length > 0))) {
-              updated.title = "IAS Coaching for the Subject of Psychology";
-              updated.methodology = [];
-              changed = true;
-            }
-
-            if (changed) {
-              servicesChanged = true;
-              return updated;
-            }
-            return service;
-          });
-          if (servicesChanged) {
-            updateDoc["services"] = newServices;
+          const phdService = currentSettings.services.find((s: any) => s.id === "phd-assistance");
+          if (!phdService || !phdService.subjects || phdService.title === "Ph.D Assistance" || phdService.items.includes("Psychology") || phdService.items.includes("Commerce")) {
+            updateDoc["services"] = [
+              {
+                "id": "teachers-training",
+                "icon": "GraduationCap",
+                "title": "Workshop on Faculty Development Programme",
+                "summary": "Capacity-building workshops for educators — covering pedagogy, life skills, leadership and classroom management.",
+                "items": [
+                  "Counselling for Student Development",
+                  "Soft Skill Training",
+                  "Developing Employability Skills",
+                  "Academic Leadership and Motivation",
+                  "Capacity Building for Teachers",
+                  "Adolescent Characteristics",
+                  "Life Skill Development",
+                  "Managing Stress at Work",
+                  "Work Life Balance",
+                  "Career Assessment",
+                  "Methodology for Effective Teaching",
+                  "Emotional Intelligence"
+                ],
+                "methodology": [
+                  "Lecture Presentation",
+                  "Group Discussion",
+                  "Case study analysis"
+                ],
+                "duration": "1–3 Days",
+                "venue": "Host Institutions",
+                "timing": "9:00 AM – 4:00 PM"
+              },
+              {
+                "id": "phd-assistance",
+                "icon": "BookOpenCheck",
+                "title": "Ph.D. Assistance",
+                "summary": "End-to-end doctoral research support — from topic selection and proposal writing to viva preparation and publication.",
+                "items": [
+                  "Topic Selection based on reviews",
+                  "Ph.D. Proposal",
+                  "Literature Review",
+                  "Development of Questionnaire/Tools & Validation",
+                  "Methodology",
+                  "Data collection & SPSS Analysis",
+                  "Study findings matching with objectives and hypotheses",
+                  "Thesis editing / Synopsis preparation / Plagiarism checking",
+                  "Viva - Voce preparation",
+                  "Publication of Research paper based on Ph.D. Thesis"
+                ],
+                "subjects": [
+                  "Psychology",
+                  "Sociology",
+                  "Commerce",
+                  "Management",
+                  "Education",
+                  "Physical Education",
+                  "Hotel management",
+                  "Health & Hospital Management",
+                  "Design & Fashion Technology",
+                  "Social Work"
+                ],
+                "methodology": [],
+                "duration": "",
+                "venue": "",
+                "timing": ""
+              },
+              {
+                "id": "psychological-assessment",
+                "icon": "BrainCircuit",
+                "title": "Counselling & Assessment",
+                "summary": "Standardised assessments to understand students' cognitive, emotional and career profiles.",
+                "items": [
+                  "Intelligence (IQ)",
+                  "Memory (MQ)",
+                  "Emotional Intelligence (EQ)",
+                  "Personality",
+                  "Creativity Assessment",
+                  "Motivation",
+                  "Career Assessment"
+                ],
+                "methodology": [],
+                "duration": "",
+                "venue": "",
+                "timing": ""
+              },
+              {
+                "id": "ias-coaching",
+                "icon": "Landmark",
+                "title": "IAS Coaching",
+                "summary": "Focused civil services preparation with foundation coaching, Psychology optional and interview guidance.",
+                "items": [
+                  "Subject of Psychology"
+                ],
+                "methodology": [],
+                "duration": "",
+                "venue": "",
+                "timing": ""
+              }
+            ];
             needsUpdate = true;
           }
         }

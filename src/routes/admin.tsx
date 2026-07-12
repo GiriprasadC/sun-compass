@@ -877,6 +877,56 @@ function AdminPage() {
                             </div>
                           </div>
 
+                          {/* Subjects List (Optional) */}
+                          <div className="space-y-2 border-t border-border pt-4">
+                            <div className="flex items-center justify-between">
+                              <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                Subjects List (Optional - e.g. Ph.D. subjects)
+                              </label>
+                              <button
+                                onClick={() => {
+                                  const updatedS = [...(selectedService.subjects || []), ""];
+                                  const updatedVal = { ...selectedService, subjects: updatedS };
+                                  setSelectedService(updatedVal);
+                                  setLocalServices(localServices.map((s) => (s.id === selectedService.id ? updatedVal : s)));
+                                }}
+                                className="inline-flex items-center gap-0.5 text-xs text-primary hover:underline"
+                              >
+                                <Plus className="h-3 w-3" />
+                                Add Subject
+                              </button>
+                            </div>
+                            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                              {(selectedService.subjects || []).map((subj: string, idx: number) => (
+                                <div key={idx} className="flex gap-2">
+                                  <input
+                                    type="text"
+                                    className="w-full rounded-xl border border-border px-3 py-2 text-xs text-foreground outline-none focus:border-primary"
+                                    value={subj}
+                                    onChange={(e) => {
+                                      const newS = [...(selectedService.subjects || [])];
+                                      newS[idx] = e.target.value;
+                                      const updatedVal = { ...selectedService, subjects: newS };
+                                      setSelectedService(updatedVal);
+                                      setLocalServices(localServices.map((s) => (s.id === selectedService.id ? updatedVal : s)));
+                                    }}
+                                  />
+                                  <button
+                                    onClick={() => {
+                                      const newS = (selectedService.subjects || []).filter((_: any, i: number) => i !== idx);
+                                      const updatedVal = { ...selectedService, subjects: newS };
+                                      setSelectedService(updatedVal);
+                                      setLocalServices(localServices.map((s) => (s.id === selectedService.id ? updatedVal : s)));
+                                    }}
+                                    className="rounded-lg p-2 text-muted-foreground hover:bg-slate-100 hover:text-destructive"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
                           {/* Methodologies */}
                           <div className="space-y-2 border-t border-border pt-4">
                             <div className="flex items-center justify-between">
