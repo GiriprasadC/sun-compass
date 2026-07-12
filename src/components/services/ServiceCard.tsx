@@ -26,7 +26,7 @@ export function ServiceCard({ service, onOpen }: Props) {
         show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } },
       }}
       whileHover={{ y: -4 }}
-      className="group flex h-full flex-col rounded-3xl border border-blue-100 bg-blue-50/50 p-7 shadow-soft transition-all hover:border-blue-300 hover:shadow-elevated"
+      className="group flex h-full flex-col rounded-3xl border border-blue-100 bg-white p-7 shadow-soft transition-all hover:border-blue-300 hover:shadow-elevated"
     >
       <div className="grid h-14 w-14 place-items-center rounded-2xl bg-primary-tint text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
         <Icon className="h-7 w-7" />

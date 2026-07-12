@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Facebook, Linkedin, Instagram, Youtube, GraduationCap, MapPin, Phone, Mail } from "lucide-react";
+import { Facebook, Linkedin, Instagram, Youtube, MapPin, Phone, Mail } from "lucide-react";
+import { SunLogo } from "@/components/ui/SunLogo";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Container } from "@/components/ui/Container";
 import { navLinks } from "@/data/navLinks";
@@ -39,13 +40,16 @@ export function Footer() {
       <Container className="grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground">
-              <GraduationCap className="h-5 w-5" />
+            <SunLogo className="h-10 w-10 text-primary" />
+            <span className="flex flex-col leading-tight">
+              <span className="font-display text-lg font-bold">SUN Academic Research &amp; Training</span>
+              <span className="text-[9px] tracking-[0.1em] text-muted-foreground">
+                (Regd. UAM No.UDYAM-TN-02-0161010/2022)
+              </span>
             </span>
-            <span className="font-display text-lg font-bold">SUN Academic</span>
           </div>
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">
-            Research &amp; Training — empowering educators, students and scholars with rigorous academic guidance.
+            Empowering educators, students and scholars with rigorous academic guidance.
           </p>
         </div>
 

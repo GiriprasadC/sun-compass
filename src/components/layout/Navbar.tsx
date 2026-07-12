@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X, GraduationCap } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import { SunLogo } from "@/components/ui/SunLogo";
 import { navLinks } from "@/data/navLinks";
 import { Container } from "@/components/ui/Container";
 import { cn } from "@/lib/utils";
@@ -31,13 +32,11 @@ export function Navbar() {
     >
       <Container className="flex h-16 items-center justify-between md:h-20">
         <Link to="/" className="flex items-center gap-2.5">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground shadow-soft">
-            <GraduationCap className="h-5 w-5" />
-          </span>
+          <SunLogo className="h-10 w-10 text-primary" />
           <span className="flex flex-col leading-tight">
-            <span className="font-display text-base font-bold text-foreground sm:text-lg">SUN Academic</span>
-            <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground sm:text-[11px]">
-              Research &amp; Training
+            <span className="font-display text-base font-bold text-foreground sm:text-lg">SUN Academic Research &amp; Training</span>
+            <span className="text-[9px] tracking-[0.1em] text-muted-foreground sm:text-[10px]">
+              (Regd. UAM No.UDYAM-TN-02-0161010/2022)
             </span>
           </span>
         </Link>

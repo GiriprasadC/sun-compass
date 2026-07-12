@@ -87,7 +87,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SUN Academic Research & Training — Chennai" },
+      { title: "SUN Academic Research & Training — (Regd. UAM No.UDYAM-TN-02-0161010/2022)" },
       {
         name: "description",
         content:
