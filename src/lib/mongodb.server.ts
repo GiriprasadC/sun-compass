@@ -65,40 +65,46 @@ async function ensureDatabaseSeeded(database: Db) {
         if (currentSettings.services) {
           let servicesChanged = false;
           const newServices = currentSettings.services.map((service: any) => {
-            if (service.id === "phd-assistance" && service.items.includes("Research Topic Selection")) {
-              servicesChanged = true;
-              return {
-                ...service,
-                items: [
-                  "Psychology",
-                  "Commerce",
-                  "Management",
-                  "Education",
-                  "Sociology",
-                  "Physical Education",
-                  "Design & Fashion Technology",
-                  "Hotel Management",
-                  "Health & Hospital Management"
-                ],
-                methodology: []
-              };
+            let updated = { ...service };
+            let changed = false;
+
+            if (service.id === "teachers-training" && service.title === "Teachers Training Programme") {
+              updated.title = "Workshop on Faculty Development Programme for College/University Teachers and Principals of Schools";
+              changed = true;
+            }
+            if (service.id === "phd-assistance" && (service.title === "Ph.D. Assistance" || service.items.includes("Research Topic Selection"))) {
+              updated.title = "Ph.D Assistance";
+              updated.items = [
+                "Psychology",
+                "Commerce",
+                "Management",
+                "Education",
+                "Sociology",
+                "Physical Education",
+                "Design & Fashion Technology",
+                "Hotel Management",
+                "Health & Hospital Management"
+              ];
+              updated.methodology = [];
+              changed = true;
             }
             if (service.id === "psychological-assessment" && 
                 (service.title === "Psychological Assessment of Students" || 
-                 service.title === "Counselling Psychologist & Assessment of Students")) {
-              servicesChanged = true;
-              return {
-                ...service,
-                title: "Counselling & Assessment of Students",
-                methodology: []
-              };
+                 service.title === "Counselling Psychologist & Assessment of Students" ||
+                 service.title === "Counselling Psychologist Assessment of Students")) {
+              updated.title = "Counselling & Assessment of Students";
+              updated.methodology = [];
+              changed = true;
             }
-            if (service.id === "ias-coaching" && service.methodology && service.methodology.length > 0) {
+            if (service.id === "ias-coaching" && (service.title === "IAS Coaching" || (service.methodology && service.methodology.length > 0))) {
+              updated.title = "IAS Coaching for the Subject of Psychology";
+              updated.methodology = [];
+              changed = true;
+            }
+
+            if (changed) {
               servicesChanged = true;
-              return {
-                ...service,
-                methodology: []
-              };
+              return updated;
             }
             return service;
           });
@@ -115,6 +121,79 @@ async function ensureDatabaseSeeded(database: Db) {
             labelLarge: "Free Consultation",
             phoneOverride: ""
           };
+          needsUpdate = true;
+        }
+
+        if (!currentSettings.services || currentSettings.services.length === 0) {
+          updateDoc["services"] = [
+            {
+              id: "teachers-training",
+              icon: "GraduationCap",
+              title: "Workshop on Faculty Development Programme for College/University Teachers and Principals of Schools",
+              summary: "Capacity-building workshops for educators — covering pedagogy, life skills, leadership and classroom management.",
+              items: [
+                "Counselling for Student Development",
+                "Soft Skill Training",
+                "Employability Skills",
+                "Tuning of Mindset"
+              ],
+              methodology: []
+            },
+            {
+              id: "phd-assistance",
+              icon: "BookOpen",
+              title: "Ph.D Assistance",
+              summary: "End-to-end academic support for doctoral candidates — from topic selection and literature review to proofreading and formatting.",
+              items: [
+                "Psychology",
+                "Commerce",
+                "Management",
+                "Education",
+                "Sociology",
+                "Physical Education",
+                "Design & Fashion Technology",
+                "Hotel Management",
+                "Health & Hospital Management"
+              ],
+              methodology: []
+            },
+            {
+              id: "psychological-assessment",
+              icon: "BrainCircuit",
+              title: "Counselling & Assessment of Students",
+              summary: "Professional psychological evaluation, academic counselling, intelligence profiling, and career guidance for students.",
+              items: [
+                "Learning Disability Assessments",
+                "Career Interest Mapping",
+                "Behavioral Counselling",
+                "IQ & Aptitude Profiling"
+              ],
+              methodology: []
+            },
+            {
+              id: "ias-coaching",
+              icon: "Award",
+              title: "IAS Coaching for the Subject of Psychology",
+              summary: "Comprehensive mentoring, study plans, and interview preparation for UPSC Civil Services and State Public Service Commission exams.",
+              items: [
+                "General Studies Coverage",
+                "Mock Interviews",
+                "Answer Writing Practice",
+                "Current Affairs Roundups"
+              ],
+              methodology: []
+            }
+          ];
+          needsUpdate = true;
+        }
+
+        if (!currentSettings.stats || currentSettings.stats.length === 0) {
+          updateDoc["stats"] = [
+            { label: "Years Experience", value: 35, suffix: "+", icon: "Award" },
+            { label: "Ph.D. Awarded", value: 10, suffix: "+", icon: "GraduationCap" },
+            { label: "Teachers are Trained", value: 90000, suffix: "", icon: "Users" },
+            { label: "Students Trained", value: 1000, suffix: "+", icon: "BookOpen" }
+          ];
           needsUpdate = true;
         }
 

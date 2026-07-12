@@ -29,7 +29,7 @@
     {
       "id": "teachers-training",
       "icon": "GraduationCap",
-      "title": "Teachers Training Programme",
+      "title": "Workshop on Faculty Development Programme for College/University Teachers and Principals of Schools",
       "summary": "Capacity-building workshops for educators — covering pedagogy, life skills, leadership and classroom management.",
       "items": [
         "Counselling for Student Development",
@@ -57,7 +57,7 @@
     {
       "id": "phd-assistance",
       "icon": "BookOpenCheck",
-      "title": "Ph.D. Assistance",
+      "title": "Ph.D Assistance",
       "summary": "End-to-end doctoral research support — from topic selection and proposal writing to viva preparation and publication.",
       "items": [
         "Psychology",
@@ -78,7 +78,7 @@
     {
       "id": "psychological-assessment",
       "icon": "BrainCircuit",
-      "title": "Counselling Psychologist & Assessment of Students",
+      "title": "Counselling & Assessment of Students",
       "summary": "Standardised assessments to understand students' cognitive, emotional and career profiles.",
       "items": [
         "IQ Assessment",
@@ -97,7 +97,7 @@
     {
       "id": "ias-coaching",
       "icon": "Landmark",
-      "title": "IAS Coaching",
+      "title": "IAS Coaching for the Subject of Psychology",
       "summary": "Focused civil services preparation with foundation coaching, Psychology optional and interview guidance.",
       "items": [
         "Foundation Coaching",

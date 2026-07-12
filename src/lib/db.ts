@@ -263,8 +263,8 @@ export const getDbData = createServerFn({ method: "GET" })
       // Map out non-serializable ObjectId for JSON serialization
       const enquiries = rawEnquiries.map(({ _id, ...rest }) => rest) as DbData["enquiries"];
 
-      const stats = settingsDoc?.stats || DEFAULT_DB_DATA.stats;
-      const services = settingsDoc?.services || DEFAULT_DB_DATA.services;
+      const stats = (settingsDoc?.stats && settingsDoc.stats.length > 0) ? settingsDoc.stats : DEFAULT_DB_DATA.stats;
+      const services = (settingsDoc?.services && settingsDoc.services.length > 0) ? settingsDoc.services : DEFAULT_DB_DATA.services;
       const contactInfo = settingsDoc?.contactInfo || DEFAULT_DB_DATA.contactInfo;
       const socialLinks = settingsDoc?.socialLinks || DEFAULT_DB_DATA.socialLinks;
       const hero = settingsDoc?.hero || DEFAULT_DB_DATA.hero;
