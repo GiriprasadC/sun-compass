@@ -9,6 +9,114 @@ async function ensureDatabaseSeeded(database: Db) {
   try {
     const settingsColl = database.collection("settings");
     const count = await settingsColl.countDocuments();
+    
+    if (count > 0) {
+      // Auto-migrate old database entries if they are still on defaults
+      const currentSettings = await settingsColl.findOne({ _id: "global_settings" as any });
+      if (currentSettings) {
+        let needsUpdate = false;
+        const updateDoc: any = {};
+
+        if (currentSettings.contactInfo?.email === "rajendra1234@gmail.com") {
+          updateDoc["contactInfo.email"] = "rajendra.2314@gmail.com";
+          needsUpdate = true;
+        }
+        
+        if (currentSettings.about?.designation === "Director, SUN Academic Research & Training, Chennai") {
+          updateDoc["about.designation"] = "Director";
+          needsUpdate = true;
+        }
+
+        if (
+          currentSettings.about?.affiliations &&
+          currentSettings.about.affiliations.includes("Tamil Nadu Government")
+        ) {
+          updateDoc["about.affiliations"] = [
+            "Annamalai University",
+            "Madras University",
+            "NITTTR, Ministry of Education, Govt. of India"
+          ];
+          updateDoc["about.bulletPoints"] = [
+            "35+ years of teaching, research and academic experience.",
+            "Guided 10+ Ph.D. Candidates and trained over 90,000 teachers."
+          ];
+          needsUpdate = true;
+        }
+
+        if (currentSettings.stats) {
+          let statsChanged = false;
+          const newStats = currentSettings.stats.map((stat: any) => {
+            if (stat.label === "Research Scholars Guided") {
+              statsChanged = true;
+              return { label: "Ph.D. Awarded", value: 10, suffix: "+", icon: "GraduationCap" };
+            }
+            if (stat.label === "Ph.D Candidates") {
+              statsChanged = true;
+              return { label: "Teachers Trained", value: 90000, suffix: "+", icon: "Users" };
+            }
+            return stat;
+          });
+          if (statsChanged) {
+            updateDoc["stats"] = newStats;
+            needsUpdate = true;
+          }
+        }
+
+        if (currentSettings.services) {
+          let servicesChanged = false;
+          const newServices = currentSettings.services.map((service: any) => {
+            if (service.id === "phd-assistance" && service.items.includes("Research Topic Selection")) {
+              servicesChanged = true;
+              return {
+                ...service,
+                items: [
+                  "Psychology",
+                  "Commerce",
+                  "Management",
+                  "Education",
+                  "Sociology",
+                  "Physical Education",
+                  "Design & Fashion Technology",
+                  "Hotel Management",
+                  "Health & Hospital Management"
+                ],
+                methodology: []
+              };
+            }
+            if (service.id === "psychological-assessment" && service.title === "Psychological Assessment of Students") {
+              servicesChanged = true;
+              return {
+                ...service,
+                title: "Counselling Psychologist & Assessment of Students",
+                methodology: []
+              };
+            }
+            if (service.id === "ias-coaching" && service.methodology && service.methodology.length > 0) {
+              servicesChanged = true;
+              return {
+                ...service,
+                methodology: []
+              };
+            }
+            return service;
+          });
+          if (servicesChanged) {
+            updateDoc["services"] = newServices;
+            needsUpdate = true;
+          }
+        }
+
+        if (needsUpdate) {
+          console.log("Migration/Update script: Applying corrections from handwritten note...");
+          await settingsColl.updateOne(
+            { _id: "global_settings" as any },
+            { $set: { ...updateDoc, updatedAt: new Date().toISOString() } }
+          );
+          console.log("Migration/Update script: Successfully patched settings database.");
+        }
+      }
+    }
+
     if (count === 0) {
       console.log("MongoDB 'settings' collection is empty. Seeding initial data from db.json...");
       

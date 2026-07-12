@@ -23,7 +23,7 @@ export function ServiceModal({ service, open, onOpenChange }: Props) {
         <div className="mt-4 space-y-6">
           <div>
             <h4 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-              What we cover
+              {service.id === "phd-assistance" ? "Subject of Ph.D. Assistance" : "What we cover"}
             </h4>
             <ul className="mt-3 grid gap-2 sm:grid-cols-2">
               {service.items.map((item) => (
@@ -35,7 +35,7 @@ export function ServiceModal({ service, open, onOpenChange }: Props) {
             </ul>
           </div>
 
-          {service.methodology && (
+          {service.methodology && service.methodology.length > 0 && (
             <div>
               <h4 className="text-sm font-semibold uppercase tracking-wider text-foreground">
                 Methodology

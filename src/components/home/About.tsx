@@ -31,34 +31,37 @@ export function About() {
     return cleanUrl.startsWith("/") || cleanUrl.startsWith("http://") || cleanUrl.startsWith("https://") || cleanUrl.startsWith("data:");
   };
 
-  const displayImage = isValidUrl(about.imageUrl) && about.imageUrl ? about.imageUrl.trim() : directorImg;
+  const hasImage = isValidUrl(about.imageUrl) && about.imageUrl;
+  const displayImage = hasImage ? about.imageUrl!.trim() : "";
   const icons = [Building2, Landmark, Flag];
 
   return (
     <section id="about" className="py-20 md:py-28">
-      <Container className="grid gap-12 lg:grid-cols-2 lg:items-center">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.5 }}
-          className="relative"
-        >
-          <div className="relative overflow-hidden rounded-3xl border border-border shadow-elevated">
-            <img
-              src={displayImage}
-              alt={`Prof. Dr. R. Rajendran — Director, SUN Academic Research & Training`}
-              width={1024}
-              height={1024}
-              loading="lazy"
-              className="h-[380px] md:h-[500px] w-full object-cover"
+      <Container className={hasImage ? "grid gap-12 lg:grid-cols-2 lg:items-center" : "max-w-3xl mx-auto"}>
+        {hasImage && (
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5 }}
+            className="relative"
+          >
+            <div className="relative overflow-hidden rounded-3xl border border-border shadow-elevated">
+              <img
+                src={displayImage}
+                alt={`Prof. Dr. R. Rajendran — Director, SUN Academic Research & Training`}
+                width={1024}
+                height={1024}
+                loading="lazy"
+                className="h-[380px] md:h-[500px] w-full object-cover"
+              />
+            </div>
+            <div
+              aria-hidden
+              className="absolute -bottom-8 -right-8 -z-10 h-40 w-40 rounded-3xl bg-primary-tint"
             />
-          </div>
-          <div
-            aria-hidden
-            className="absolute -bottom-8 -right-8 -z-10 h-40 w-40 rounded-3xl bg-primary-tint"
-          />
-        </motion.div>
+          </motion.div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 24 }}

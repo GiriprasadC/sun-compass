@@ -59,6 +59,11 @@ export function Footer() {
                 </Link>
               </li>
             ))}
+            <li>
+              <Link to="/contact" className="text-muted-foreground transition-colors hover:text-primary">
+                Contact Us
+              </Link>
+            </li>
           </ul>
         </div>
 

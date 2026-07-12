@@ -7,16 +7,16 @@
       "icon": "Award"
     },
     {
-      "label": "Research Scholars Guided",
-      "value": 85,
-      "suffix": "+",
-      "icon": "Users"
-    },
-    {
-      "label": "Ph.D Candidates",
+      "label": "Ph.D. Awarded",
       "value": 10,
       "suffix": "+",
       "icon": "GraduationCap"
+    },
+    {
+      "label": "Teachers Trained",
+      "value": 90000,
+      "suffix": "+",
+      "icon": "Users"
     },
     {
       "label": "Students Trained",
@@ -60,20 +60,15 @@
       "title": "Ph.D. Assistance",
       "summary": "End-to-end doctoral research support — from topic selection and proposal writing to viva preparation and publication.",
       "items": [
-        "Research Topic Selection",
-        "Ph.D Proposal Writing",
-        "Literature Review",
-        "Questionnaire Development",
-        "Tool Validation",
-        "Research Methodology",
-        "Data Collection",
-        "SPSS Analysis",
-        "Hypothesis Testing",
-        "Thesis Editing",
-        "Synopsis Preparation",
-        "Plagiarism Checking",
-        "Viva Preparation",
-        "Research Paper Publication Support"
+        "Psychology",
+        "Commerce",
+        "Management",
+        "Education",
+        "Sociology",
+        "Physical Education",
+        "Design & Fashion Technology",
+        "Hotel Management",
+        "Health & Hospital Management"
       ],
       "methodology": [],
       "duration": "",
@@ -83,7 +78,7 @@
     {
       "id": "psychological-assessment",
       "icon": "BrainCircuit",
-      "title": "Psychological Assessment of Students",
+      "title": "Counselling Psychologist & Assessment of Students",
       "summary": "Standardised assessments to understand students' cognitive, emotional and career profiles.",
       "items": [
         "IQ Assessment",
@@ -122,7 +117,7 @@
     "directorSub": "Director, SUN Academic Research & Training",
     "address": "No.104/1, A.K. Swamy Nagar, 7th Street, Kilpauk, Chennai – 600010",
     "phone": "98403 41412",
-    "email": "rajendra1234@gmail.com",
+    "email": "rajendra.2314@gmail.com",
     "officeHours": "9:00 AM – 8:00 PM (All Days)"
   },
   "socialLinks": {
@@ -141,7 +136,7 @@
   },
   "about": {
     "name": "Prof. Dr. R. Rajendran",
-    "designation": "Director, SUN Academic Research & Training, Chennai",
+    "designation": "Director",
     "bio": "A distinguished academician whose career took shape at Annamalai University, rising to Professor & Head of the Centre for Educational Management and Applied Science. Over three and a half decades, he has shaped generations of teachers, scholars and civil service aspirants across South India.",
     "credentials": [
       "M.A.",
@@ -151,13 +146,13 @@
       "FBMS"
     ],
     "affiliations": [
-      "NITTTR",
-      "Ministry of Education",
-      "Tamil Nadu Government"
+      "Annamalai University",
+      "Madras University",
+      "NITTTR, Ministry of Education, Govt. of India"
     ],
     "bulletPoints": [
       "35+ years of teaching, research and academic experience.",
-      "Guided 10 Candidates, 85 Research Scholars and numerous Ph.D. researchers."
+      "Guided 10+ Ph.D. Candidates and trained over 90,000 teachers."
     ],
     "imageUrl": ""
   },
