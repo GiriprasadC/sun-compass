@@ -134,8 +134,7 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
-function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
+function RootContent() {
   const { data: dbData } = useQuery({
     queryKey: ["dbData"],
     queryFn: () => getDbData(),
@@ -148,23 +147,11 @@ function RootComponent() {
     phoneOverride: ""
   };
 
-  if (!widget.enabled) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        <Navbar />
-        <main className="min-h-screen">
-          <Outlet />
-        </main>
-        <Footer />
-      </QueryClientProvider>
-    );
-  }
-
   const phone = widget.phoneOverride || dbData?.contactInfo?.phone || "98403 41412";
   const cleanPhone = phone.replace(/\s+/g, "");
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <>
       <Navbar />
       <main className="min-h-screen">
         <Outlet />
@@ -172,19 +159,31 @@ function RootComponent() {
       <Footer />
 
       {/* Floating Action Consultation Widget */}
-      <a
-        href={`tel:${cleanPhone}`}
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-3.5 rounded-full bg-primary pl-4 pr-5 py-3 text-white shadow-elevated transition-all duration-300 hover:scale-105 hover:bg-primary-hover hover:shadow-hover group cursor-pointer animate-bounce-subtle"
-        title={`Click here for ${widget.labelLarge}`}
-      >
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm">
-          <Phone className="h-4.5 w-4.5 group-hover:animate-wiggle" />
-        </div>
-        <div className="flex flex-col text-left">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-white/80">{widget.labelSmall}</span>
-          <span className="text-sm font-bold leading-tight animate-pulse">{widget.labelLarge}</span>
-        </div>
-      </a>
+      {widget.enabled && (
+        <a
+          href={`tel:${cleanPhone}`}
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-3.5 rounded-full bg-primary pl-4 pr-5 py-3 text-white shadow-elevated transition-all duration-300 hover:scale-105 hover:bg-primary-hover hover:shadow-hover group cursor-pointer animate-bounce-subtle"
+          title={`Click here for ${widget.labelLarge}`}
+        >
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm">
+            <Phone className="h-4.5 w-4.5 group-hover:animate-wiggle" />
+          </div>
+          <div className="flex flex-col text-left">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-white/80">{widget.labelSmall}</span>
+            <span className="text-sm font-bold leading-tight animate-pulse">{widget.labelLarge}</span>
+          </div>
+        </a>
+      )}
+    </>
+  );
+}
+
+function RootComponent() {
+  const { queryClient } = Route.useRouteContext();
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RootContent />
     </QueryClientProvider>
   );
 }
