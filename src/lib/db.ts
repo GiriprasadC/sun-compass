@@ -165,7 +165,7 @@ const DEFAULT_DB_DATA: DbData = {
   ],
   contactInfo: {
     directorName: "Prof. Dr. R. Rajendran",
-    directorSub: "Director, SUN Academic Research & Training",
+    directorSub: "SUN Academic Research & Training",
     address: "No.104/1, A.K. Swamy Nagar, 7th Street, Kilpauk, Chennai – 600010",
     phone: "98403 41412",
     email: "rajendra1234@gmail.com",

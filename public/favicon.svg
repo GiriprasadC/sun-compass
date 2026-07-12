@@ -1,0 +1,38 @@
+<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Solid primary green circle background -->
+  <circle cx="32" cy="32" r="32" fill="#2E7D32" />
+
+  <!-- Sun rays in white -->
+  <g stroke="#ffffff" stroke-width="1.8" stroke-linecap="round">
+    <line x1="32" y1="38" x2="32" y2="10" />
+    <line x1="32" y1="38" x2="43.9" y2="12.7" />
+    <line x1="32" y1="38" x2="53.8" y2="20.3" />
+    <line x1="32" y1="38" x2="59.3" y2="31.3" />
+    <line x1="32" y1="38" x2="59.8" y2="43.8" />
+    <line x1="32" y1="38" x2="55.2" y2="55.2" />
+    <line x1="32" y1="38" x2="43.8" y2="59.8" />
+    <line x1="32" y1="38" x2="20.1" y2="12.7" />
+    <line x1="32" y1="38" x2="10.2" y2="20.3" />
+    <line x1="32" y1="38" x2="4.7" y2="31.3" />
+    <line x1="32" y1="38" x2="4.2" y2="43.8" />
+    <line x1="32" y1="38" x2="8.8" y2="55.2" />
+    <line x1="32" y1="38" x2="20.2" y2="59.8" />
+  </g>
+
+  <!-- Sun semicircle in white -->
+  <path d="M16 38 A16 16 0 0 1 48 38" fill="#ffffff" fill-opacity="0.15" stroke="#ffffff" stroke-width="2" />
+
+  <!-- Horizontal baseline in white -->
+  <line x1="12" y1="38" x2="52" y2="38" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
+
+  <!-- Lotus / leaf motif in white -->
+  <!-- Center petal -->
+  <path d="M32 36 C32 28 32 24 32 20 C34 24 34 28 34 36 Z" fill="#ffffff" fill-opacity="0.9" />
+  <path d="M32 36 C32 28 32 24 32 20 C30 24 30 28 30 36 Z" fill="#ffffff" fill-opacity="0.9" />
+  <!-- Left petals -->
+  <path d="M30 36 C27 30 24 26 22 24 C24 28 26 32 30 36 Z" fill="#ffffff" fill-opacity="0.8" />
+  <path d="M28 37 C24 33 20 30 18 29 C20 33 24 35 28 37 Z" fill="#ffffff" fill-opacity="0.7" />
+  <!-- Right petals -->
+  <path d="M34 36 C37 30 40 26 42 24 C40 28 38 32 34 36 Z" fill="#ffffff" fill-opacity="0.8" />
+  <path d="M36 37 C40 33 44 30 46 29 C44 33 40 35 36 37 Z" fill="#ffffff" fill-opacity="0.7" />
+</svg>
