@@ -544,3 +544,55 @@ export const getDbStatus = createServerFn({ method: "GET" })
       };
     }
   });
+
+export const importDbData = createServerFn({ method: "POST" })
+  .validator((data: any) => data)
+  .handler(async ({ data }) => {
+    try {
+      const { connectToDatabase } = await import("./mongodb.server");
+      const { db } = await connectToDatabase();
+      
+      const { enquiries, ...settings } = data;
+      
+      await db.collection("settings").updateOne(
+        { _id: "global_settings" as any },
+        { $set: { ...settings, updatedAt: new Date().toISOString() } },
+        { upsert: true }
+      );
+      
+      return { success: true };
+    } catch (err) {
+      console.error("Import DB failed:", err);
+      return { success: false, error: (err as Error).message || String(err) };
+    }
+  });
+
+export const resetToDefaultDb = createServerFn({ method: "POST" })
+  .handler(async () => {
+    try {
+      const fs = await import("node:fs/promises");
+      const path = await import("node:path");
+      
+      const cwd = typeof process !== "undefined" && typeof process.cwd === "function" ? process.cwd() : ".";
+      const dbJsonPath = path.resolve(cwd, "src/data/db.json");
+      
+      const rawData = await fs.readFile(dbJsonPath, "utf-8");
+      const data = JSON.parse(rawData);
+      
+      const { connectToDatabase } = await import("./mongodb.server");
+      const { db } = await connectToDatabase();
+      
+      const { enquiries, ...settings } = data;
+      
+      await db.collection("settings").updateOne(
+        { _id: "global_settings" as any },
+        { $set: { ...settings, updatedAt: new Date().toISOString() } },
+        { upsert: true }
+      );
+      
+      return { success: true };
+    } catch (err) {
+      console.error("Reset DB failed:", err);
+      return { success: false, error: (err as Error).message || String(err) };
+    }
+  });

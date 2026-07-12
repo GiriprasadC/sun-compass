@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getDbData, updateStats, updateServices, updateContactInfo, updateSocialLinks, deleteEnquiry, updateHero, updateAbout, updateSectionOrder, updateConsultationWidget, getDbStatus, uploadImage, type DbData } from "@/lib/db";
+import { getDbData, updateStats, updateServices, updateContactInfo, updateSocialLinks, deleteEnquiry, updateHero, updateAbout, updateSectionOrder, updateConsultationWidget, getDbStatus, uploadImage, importDbData, resetToDefaultDb, type DbData } from "@/lib/db";
 import { Container } from "@/components/ui/Container";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,7 +31,8 @@ import {
   Upload,
   Sliders,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  RefreshCw
 } from "lucide-react";
 
 function isValidUrl(url?: string): boolean {
@@ -116,6 +117,36 @@ function AdminPage() {
     queryKey: ["dbStatus"],
     queryFn: () => getDbStatus(),
     refetchInterval: 15000,
+  });
+
+  const resetMutation = useMutation({
+    mutationFn: () => resetToDefaultDb(),
+    onSuccess: (res) => {
+      if (res.success) {
+        toast.success("Live database has been reset to codebase defaults (db.json)!");
+        queryClient.invalidateQueries({ queryKey: ["dbData"] });
+      } else {
+        toast.error("Reset failed: " + (res.error || "Unknown error"));
+      }
+    },
+    onError: (err) => {
+      toast.error("Reset failed: " + err.message);
+    }
+  });
+
+  const importMutation = useMutation({
+    mutationFn: (data: any) => importDbData({ data }),
+    onSuccess: (res) => {
+      if (res.success) {
+        toast.success("Database backup successfully imported!");
+        queryClient.invalidateQueries({ queryKey: ["dbData"] });
+      } else {
+        toast.error("Import failed: " + (res.error || "Unknown error"));
+      }
+    },
+    onError: (err) => {
+      toast.error("Import failed: " + err.message);
+    }
   });
 
   // Check auth on load
@@ -362,6 +393,48 @@ function AdminPage() {
                 </div>
               </div>
             )}
+
+            {/* Reset Live DB Button */}
+            <button
+              onClick={() => {
+                if (window.confirm("Are you sure you want to reset the live database to default codebase values (db.json)? This will overwrite all custom live settings.")) {
+                  resetMutation.mutate();
+                }
+              }}
+              disabled={resetMutation.isPending}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white px-3.5 py-2.5 text-xs font-semibold text-muted-foreground hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all cursor-pointer disabled:opacity-50"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${resetMutation.isPending ? "animate-spin" : ""}`} />
+              Reset to Defaults
+            </button>
+
+            {/* Import JSON Backup */}
+            <label className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white px-3.5 py-2.5 text-xs font-semibold text-muted-foreground hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all cursor-pointer disabled:opacity-50">
+              <Upload className="h-3.5 w-3.5" />
+              Import Backup
+              <input
+                type="file"
+                accept=".json"
+                className="hidden"
+                disabled={importMutation.isPending}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = (event) => {
+                    try {
+                      const data = JSON.parse(event.target?.result as string);
+                      if (window.confirm("Are you sure you want to import this database backup? It will overwrite current settings.")) {
+                        importMutation.mutate(data);
+                      }
+                    } catch (err) {
+                      toast.error("Failed to parse JSON file!");
+                    }
+                  };
+                  reader.readAsText(file);
+                }}
+              />
+            </label>
 
             <button
               onClick={handleLogout}
