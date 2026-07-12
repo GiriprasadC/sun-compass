@@ -270,11 +270,15 @@ function AdminPage() {
   const [isHeroUploading, setIsHeroUploading] = useState(false);
   const [isAboutUploading, setIsAboutUploading] = useState(false);
   const [localSectionOrder, setLocalSectionOrder] = useState<string[]>([]);
+  const [localStats, setLocalStats] = useState<any[]>([]);
 
   // Sync server data to local edit forms
   useEffect(() => {
     if (dbData?.services) {
       setLocalServices(dbData.services);
+    }
+    if (dbData?.stats) {
+      setLocalStats(dbData.stats);
     }
     if (dbData?.hero) {
       setHeroImageUrl(dbData.hero.imageUrl || "");
@@ -1017,7 +1021,7 @@ function AdminPage() {
                   </p>
 
                   <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                    {stats.map((s: any, idx: number) => (
+                    {localStats.map((s: any, idx: number) => (
                       <div key={idx} className="rounded-2xl border border-border p-4 shadow-sm bg-slate-50/50 space-y-3">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-bold text-primary">Stat Card #{idx + 1}</span>
@@ -1030,9 +1034,9 @@ function AdminPage() {
                             className="mt-1 w-full rounded-lg border border-border bg-white px-2 py-1.5 text-xs text-foreground outline-none"
                             value={s.icon}
                             onChange={(e) => {
-                              const updatedStats = [...stats];
+                              const updatedStats = [...localStats];
                               updatedStats[idx] = { ...s, icon: e.target.value };
-                              statsMutation.mutate(updatedStats);
+                              setLocalStats(updatedStats);
                             }}
                           >
                             {AVAILABLE_ICONS.map((i) => (
@@ -1051,9 +1055,9 @@ function AdminPage() {
                             className="mt-1 w-full rounded-lg border border-border px-2 py-1.5 text-xs text-foreground outline-none"
                             value={s.label}
                             onChange={(e) => {
-                              const updatedStats = [...stats];
+                              const updatedStats = [...localStats];
                               updatedStats[idx] = { ...s, label: e.target.value };
-                              statsMutation.mutate(updatedStats);
+                              setLocalStats(updatedStats);
                             }}
                           />
                         </div>
@@ -1067,9 +1071,9 @@ function AdminPage() {
                               className="mt-1 w-full rounded-lg border border-border px-2 py-1.5 text-xs text-foreground outline-none"
                               value={s.value}
                               onChange={(e) => {
-                                const updatedStats = [...stats];
+                                const updatedStats = [...localStats];
                                 updatedStats[idx] = { ...s, value: parseInt(e.target.value) || 0 };
-                                statsMutation.mutate(updatedStats);
+                                setLocalStats(updatedStats);
                               }}
                             />
                           </div>
@@ -1082,15 +1086,30 @@ function AdminPage() {
                               className="mt-1 w-full rounded-lg border border-border px-2 py-1.5 text-xs text-foreground outline-none"
                               value={s.suffix}
                               onChange={(e) => {
-                                const updatedStats = [...stats];
+                                const updatedStats = [...localStats];
                                 updatedStats[idx] = { ...s, suffix: e.target.value };
-                                statsMutation.mutate(updatedStats);
+                                setLocalStats(updatedStats);
                               }}
                             />
                           </div>
                         </div>
                       </div>
                     ))}
+                  </div>
+
+                  <div className="mt-8 border-t border-border pt-4">
+                    <button
+                      onClick={() => statsMutation.mutate(localStats)}
+                      disabled={statsMutation.isPending}
+                      className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-hover shadow-soft"
+                    >
+                      {statsMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Save className="h-4 w-4" />
+                      )}
+                      Save Statistics
+                    </button>
                   </div>
                 </div>
               )}
